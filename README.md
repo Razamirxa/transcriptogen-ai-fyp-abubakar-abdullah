@@ -13,16 +13,16 @@ Supervisor: Maya Bint Yousaf · Co-supervisor: Misbah Akram
 
 Koi bhi **video ya audio file** (ya YouTube link) do, ye app usse banata hai:
 
-| Feature | Kya milta hai |
-| --- | --- |
-| **Transcription** | Awaz ko text mein (85+ languages, Urdu + English mix bhi) |
-| **Speaker diarization** | Kaun kab bola: `Speaker 1`, `Speaker 2` ... |
-| **Subtitles (SRT / VTT)** | Har lafz ke real timestamps se bani subtitle files |
-| **Translation** | Transcript aur subtitles ka tarjuma (Urdu, English, Arabic, Hindi, aur 9 aur languages), timing same rehti hai |
-| **Quiz (MCQs)** | Lecture se sawal, 4 options, hint, aur har option ki wajah |
-| **Study notes** | Summary, key points, chapters, keywords |
-| **Live captions** | Real-time transcription demo (`live_demo.py`) |
-| **Lambi videos** | 1 ghante+ ki video bhi chalti hai, code khud chunks banata hai |
+| Feature                         | Kya milta hai                                                                                                  |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| **Transcription**         | Awaz ko text mein (85+ languages, Urdu + English mix bhi)                                                      |
+| **Speaker diarization**   | Kaun kab bola:`Speaker 1`, `Speaker 2` ...                                                                 |
+| **Subtitles (SRT / VTT)** | Har lafz ke real timestamps se bani subtitle files                                                             |
+| **Translation**           | Transcript aur subtitles ka tarjuma (Urdu, English, Arabic, Hindi, aur 9 aur languages), timing same rehti hai |
+| **Quiz (MCQs)**           | Lecture se sawal, 4 options, hint, aur har option ki wajah                                                     |
+| **Study notes**           | Summary, key points, chapters, keywords                                                                        |
+| **Live captions**         | Real-time transcription demo (`live_demo.py`)                                                                |
+| **Lambi videos**          | 1 ghante+ ki video bhi chalti hai, code khud chunks banata hai                                                 |
 
 AI models (Google Gemini):
 
@@ -34,13 +34,13 @@ AI models (Google Gemini):
 
 ## 2. Zaroori cheezein (requirements)
 
-| Cheez | Kyun chahiye | Kaise lein |
-| --- | --- | --- |
-| **Python 3.13** | Project isi version par bana hai | `uv` khud download kar leta hai |
-| **uv** | Package manager (pip + venv ka modern replacement) | PowerShell: `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 \| iex"` |
-| **FFmpeg** | Video se audio nikalna, chunks banana | PowerShell: `winget install Gyan.FFmpeg` phir terminal restart |
-| **Gemini API key** | Google ke models use karne ke liye | <https://aistudio.google.com/app/apikey> → Create API key |
-| **Git** (optional) | Code GitHub se lene ke liye | <https://git-scm.com> |
+| Cheez                    | Kyun chahiye                                       | Kaise lein                                                                                        |
+| ------------------------ | -------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| **Python 3.13**    | Project isi version par bana hai                   | `uv` khud download kar leta hai                                                                 |
+| **uv**             | Package manager (pip + venv ka modern replacement) | PowerShell:`powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 \| iex"` |
+| **FFmpeg**         | Video se audio nikalna, chunks banana              | PowerShell:`winget install Gyan.FFmpeg` phir terminal restart                                   |
+| **Gemini API key** | Google ke models use karne ke liye                 | [https://aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey) → Create API key |
+| **Git** (optional) | Code GitHub se lene ke liye                        | [https://git-scm.com](https://git-scm.com)                                                         |
 
 > ⚠️ `gemini-3.5-transcribe` **paid model** hai. Jis AI Studio project se key banao usme billing / prepaid credits hone chahiye
 > (rate ≈ $0.005 per minute audio, yani 1 ghante ka lecture ≈ $0.30). Text models (translation/quiz) free tier par bhi chalte hain,
@@ -72,7 +72,7 @@ uv run pytest
 uv run streamlit run app.py
 ```
 
-Browser khud khulega: <http://localhost:8501>
+Browser khud khulega: [http://localhost:8501](http://localhost:8501)
 
 `.env` file aisi dikhni chahiye:
 
@@ -195,132 +195,132 @@ Neeche har file ke functions/classes hain, is order mein jis order mein file mei
 
 #### `transcriptogen/config.py` – settings aur constants
 
-| Naam | Kya hai |
-| --- | --- |
-| `TRANSCRIBE_MODEL`, `TEXT_MODEL`, `TEXT_FALLBACK_MODEL` | Models ke naam (`.env` se override ho sakte hain) |
-| `MAX_MINUTES_PLAIN / ANNOTATED`, `CHUNK_MINUTES_*` | Google ki 60/30 min limit aur hamare 55/25 min chunks |
-| `INLINE_LIMIT_BYTES` | 15 MB tak audio inline (base64) jata hai, usse bada Files API se |
-| `AUDIO_EXTS`, `VIDEO_EXTS`, `MIME_BY_EXT` | Kaun se file types allowed hain aur unka MIME type |
-| `LANGUAGE_OPTIONS` | UI ke language dropdown ka mapping → BCP-47 codes (`ur-PK`, `en-US` ...) |
-| `TRANSLATION_TARGETS` | Translation dropdown ki languages |
-| `class TranscribeOptions` | Ek run ki settings: `language_codes`, `diarization`, `word_timestamps`, `smart_mode`, `custom_vocabulary`. Properties: `annotated` (speakers ya timestamps on hain?), `chunk_minutes` (25 ya 55) |
-| `TEXT_MODEL_CANDIDATES` | Text models ki order jis mein quota error par switch hota hai |
-| `get_api_keys()` | `.env` se saari keys list mein (GEMINI_API_KEY, _2, _3 ..., GEMINI_API_KEYS) |
-| `get_api_key()` | Sirf pehli key |
+| Naam                                                          | Kya hai                                                                                                                                                                                                       |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `TRANSCRIBE_MODEL`, `TEXT_MODEL`, `TEXT_FALLBACK_MODEL` | Models ke naam (`.env` se override ho sakte hain)                                                                                                                                                           |
+| `MAX_MINUTES_PLAIN / ANNOTATED`, `CHUNK_MINUTES_*`        | Google ki 60/30 min limit aur hamare 55/25 min chunks                                                                                                                                                         |
+| `INLINE_LIMIT_BYTES`                                        | 15 MB tak audio inline (base64) jata hai, usse bada Files API se                                                                                                                                              |
+| `AUDIO_EXTS`, `VIDEO_EXTS`, `MIME_BY_EXT`               | Kaun se file types allowed hain aur unka MIME type                                                                                                                                                            |
+| `LANGUAGE_OPTIONS`                                          | UI ke language dropdown ka mapping → BCP-47 codes (`ur-PK`, `en-US` ...)                                                                                                                                 |
+| `TRANSLATION_TARGETS`                                       | Translation dropdown ki languages                                                                                                                                                                             |
+| `class TranscribeOptions`                                   | Ek run ki settings:`language_codes`, `diarization`, `word_timestamps`, `smart_mode`, `custom_vocabulary`. Properties: `annotated` (speakers ya timestamps on hain?), `chunk_minutes` (25 ya 55) |
+| `TEXT_MODEL_CANDIDATES`                                     | Text models ki order jis mein quota error par switch hota hai                                                                                                                                                 |
+| `get_api_keys()`                                            | `.env` se saari keys list mein (GEMINI_API_KEY, _2, _3 ..., GEMINI_API_KEYS)                                                                                                                                |
+| `get_api_key()`                                             | Sirf pehli key                                                                                                                                                                                                |
 
 #### `transcriptogen/models.py` – data structures
 
-| Naam | Kya hai |
-| --- | --- |
-| `class Word` | Ek lafz: `text`, `start`, `end` (seconds), `speaker` |
-| `class TranscriptResult` | Poora result: `text`, `words`, `duration`, `model`, `chunks`, `usage`. Properties `speakers` (unique speakers ki list), `has_timestamps`, method `to_dict()` |
+| Naam                       | Kya hai                                                                                                                                                                       |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `class Word`             | Ek lafz:`text`, `start`, `end` (seconds), `speaker`                                                                                                                   |
+| `class TranscriptResult` | Poora result:`text`, `words`, `duration`, `model`, `chunks`, `usage`. Properties `speakers` (unique speakers ki list), `has_timestamps`, method `to_dict()` |
 
 #### `transcriptogen/media.py` – FFmpeg ka kaam
 
-| Naam | Kya karta hai |
-| --- | --- |
-| `_CANDIDATE_DIRS`, `_works()`, `_find()` | ffmpeg/ffprobe ko PATH, WinGet folder, `C:\ffmpeg` waghera mein dhoondna aur check karna ke chalta hai |
-| `ffmpeg()`, `ffprobe()` | Working binary ka path (cache ke saath) |
-| `media_kind(path)` | `"audio"`, `"video"` ya `"unknown"` extension se |
-| `duration_seconds(path)` | ffprobe se duration; na mile to ffmpeg ke banner se parse |
-| `extract_audio(src)` | Kisi bhi media ko mono 16 kHz 64 kbps mp3 banana (chhota, API friendly) |
-| `class Chunk` | `index`, `path`, `start`, `end` (seconds) |
-| `split_audio(audio, chunk_seconds)` | Audio ko sequential chunks mein kaatna (stream copy, re-encode nahi) |
-| `safe_unlink(path)` | Temp file delete, error ignore |
+| Naam                                           | Kya karta hai                                                                                           |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `_CANDIDATE_DIRS`, `_works()`, `_find()` | ffmpeg/ffprobe ko PATH, WinGet folder,`C:\ffmpeg` waghera mein dhoondna aur check karna ke chalta hai |
+| `ffmpeg()`, `ffprobe()`                    | Working binary ka path (cache ke saath)                                                                 |
+| `media_kind(path)`                           | `"audio"`, `"video"` ya `"unknown"` extension se                                                  |
+| `duration_seconds(path)`                     | ffprobe se duration; na mile to ffmpeg ke banner se parse                                               |
+| `extract_audio(src)`                         | Kisi bhi media ko mono 16 kHz 64 kbps mp3 banana (chhota, API friendly)                                 |
+| `class Chunk`                                | `index`, `path`, `start`, `end` (seconds)                                                       |
+| `split_audio(audio, chunk_seconds)`          | Audio ko sequential chunks mein kaatna (stream copy, re-encode nahi)                                    |
+| `safe_unlink(path)`                          | Temp file delete, error ignore                                                                          |
 
 #### `transcriptogen/transcriber.py` – Gemini 3.5 Transcribe
 
-| Naam | Kya karta hai |
-| --- | --- |
-| `build_transcription_config(opts)` | `TranscribeOptions` → API ka `transcription_config` dict (`language_codes`, `mode`, `custom_vocabulary`; incompatible cheezein drop) |
-| `parse_offset(value)` | `"0.100s"` / `"250ms"` / number → seconds (float) |
-| `normalise_speaker(raw)` | `"spk:0"`, `"spk_1"` → `"Speaker 1"` |
-| `extract_words(interaction, offset)` | Response ke `steps[].content[].annotations[]` se `word_info` nikal kar `Word` list; `offset` (chunk ka start) har time mein add |
-| `_usage_dict(interaction)` | Token usage ko dict mein |
-| `_is_quota()`, `_classify()`, `class BillingError` | Error ki qisam: retry / quota / billing / fatal |
-| `estimate_seconds(duration, opts, size)` | Kitna time lagega (real runs par calibrated) |
-| `fmt_eta(seconds)` | `125` → `"2m 05s"` |
-| `class GeminiTranscriber` | Main class |
-| ↳ `__init__(api_key, model, api_keys)` | Keys ki list rakhta hai, `last_estimate` |
-| ↳ `client` (property) | Current key ka `genai.Client` (cache) |
-| ↳ `_next_key()` | Quota/billing error par agli key |
-| ↳ `_audio_part(path)` | Chhoti file → base64 inline part; badi → Files API upload, ACTIVE hone tak wait |
-| ↳ `transcribe_chunk(path, opts, offset)` | Ek chunk ki API call: `client.interactions.create(...)`, retry (5/10/20 s) on 503, key rotation on quota, remote file delete |
-| ↳ `transcribe(media_path, opts, progress)` | Poora pipeline: duration → estimate → ffmpeg → chunks → har chunk transcribe → text jodna, words jodna → `TranscriptResult`; `progress(msg, frac)` callback UI ke liye |
+| Naam                                                     | Kya karta hai                                                                                                                                                                   |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `build_transcription_config(opts)`                     | `TranscribeOptions` → API ka `transcription_config` dict (`language_codes`, `mode`, `custom_vocabulary`; incompatible cheezein drop)                                 |
+| `parse_offset(value)`                                  | `"0.100s"` / `"250ms"` / number → seconds (float)                                                                                                                          |
+| `normalise_speaker(raw)`                               | `"spk:0"`, `"spk_1"` → `"Speaker 1"`                                                                                                                                     |
+| `extract_words(interaction, offset)`                   | Response ke`steps[].content[].annotations[]` se `word_info` nikal kar `Word` list; `offset` (chunk ka start) har time mein add                                          |
+| `_usage_dict(interaction)`                             | Token usage ko dict mein                                                                                                                                                        |
+| `_is_quota()`, `_classify()`, `class BillingError` | Error ki qisam: retry / quota / billing / fatal                                                                                                                                 |
+| `estimate_seconds(duration, opts, size)`               | Kitna time lagega (real runs par calibrated)                                                                                                                                    |
+| `fmt_eta(seconds)`                                     | `125` → `"2m 05s"`                                                                                                                                                         |
+| `class GeminiTranscriber`                              | Main class                                                                                                                                                                      |
+| ↳`__init__(api_key, model, api_keys)`                 | Keys ki list rakhta hai,`last_estimate`                                                                                                                                       |
+| ↳`client` (property)                                  | Current key ka`genai.Client` (cache)                                                                                                                                          |
+| ↳`_next_key()`                                        | Quota/billing error par agli key                                                                                                                                                |
+| ↳`_audio_part(path)`                                  | Chhoti file → base64 inline part; badi → Files API upload, ACTIVE hone tak wait                                                                                               |
+| ↳`transcribe_chunk(path, opts, offset)`               | Ek chunk ki API call:`client.interactions.create(...)`, retry (5/10/20 s) on 503, key rotation on quota, remote file delete                                                   |
+| ↳`transcribe(media_path, opts, progress)`             | Poora pipeline: duration → estimate → ffmpeg → chunks → har chunk transcribe → text jodna, words jodna →`TranscriptResult`; `progress(msg, frac)` callback UI ke liye |
 
 #### `transcriptogen/subtitles.py` – words se subtitles
 
-| Naam | Kya karta hai |
-| --- | --- |
-| `class Cue` | Ek subtitle entry: `index`, `start`, `end`, `text`, `speaker` |
-| `fmt_time(t, sep)` | Seconds → `HH:MM:SS,mmm` (SRT) ya `HH:MM:SS.mmm` (VTT) |
+| Naam                                                                | Kya karta hai                                                               |
+| ------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `class Cue`                                                       | Ek subtitle entry:`index`, `start`, `end`, `text`, `speaker`      |
+| `fmt_time(t, sep)`                                                | Seconds →`HH:MM:SS,mmm` (SRT) ya `HH:MM:SS.mmm` (VTT)                  |
 | `cues_from_words(words, max_chars=84, max_duration=6, max_gap=1)` | Lafz jod kar cues; nayi cue speaker change / 1 s pause / 84 chars / 6 s par |
-| `cues_from_text(text, duration)` | Fallback jab timestamps na hon: lines ko duration par barabar baantna |
-| `to_srt(cues)`, `to_vtt(cues)` | Final file text (`with_speaker` se `Speaker 1:` prefix) |
-| `speaker_transcript(words)` | `[00:01:05] Speaker 2: ...` wale paragraphs |
+| `cues_from_text(text, duration)`                                  | Fallback jab timestamps na hon: lines ko duration par barabar baantna       |
+| `to_srt(cues)`, `to_vtt(cues)`                                  | Final file text (`with_speaker` se `Speaker 1:` prefix)                 |
+| `speaker_transcript(words)`                                       | `[00:01:05] Speaker 2: ...` wale paragraphs                               |
 
 #### `transcriptogen/generators.py` – translation, quiz, notes, Urdu fix
 
-| Naam | Kya karta hai |
-| --- | --- |
-| `AnswerOption`, `Question`, `Quiz` | Quiz ka JSON schema (pydantic): option ka `text`, `is_correct`, `rationale`; question ka `hint`, `topic` |
-| `TranslatedCue`, `TranslatedCues` | Cue translation ka schema (`index` + `text`) taake timing map ho sake |
-| `StudyNotes` | `summary`, `key_points`, `keywords`, `chapters` |
-| `TRANSLATE_PROMPT`, `TRANSLATE_CUES_PROMPT`, `QUIZ_PROMPT`, `URDU_SCRIPT_FIX_PROMPT`, `NOTES_PROMPT` | Saare prompts (technical terms English, Urdu script, Roman Urdu nahi) |
-| `MAX_CHARS` | Transcript ka max hissa jo prompt mein jata hai (120k chars) |
-| `retry_delay_seconds(e)` | Error se "retry in 1.2s" parse |
-| `classify_error(e)` | `transient` / `quota` / `billing` / `model_gone` / `fatal` |
-| `class QuotaExhaustedError` | Jab saari keys aur models khatam |
-| `has_devanagari(text)` | Hindi script hai ya nahi |
-| `_clean(text)` | Model ke ```` ``` ```` ya `---` hatana |
-| `class ContentGenerator` | Text generation with rotation |
-| ↳ `__init__(api_key, model, api_keys, models)` | Keys aur models ki lists |
-| ↳ `model`, `client` (properties) | Current model / current key ka client |
-| ↳ `_advance(kind)` | Agla model, phir agli key |
-| ↳ `_generate(prompt, cfg)` | `generate_content` + backoff (3/6/12 s) + rotation logic |
-| ↳ `_text(prompt)` | Plain text jawab |
-| ↳ `_json(prompt, schema)` | JSON jawab jo pydantic schema mein parse hota hai |
-| ↳ `fix_urdu_script(text)` | Devanagari → Urdu script (blocks mein) |
-| ↳ `fix_urdu_script_cues(cues)` | Wahi, subtitles ke liye timing rakh kar |
-| ↳ `translate(text, target)` | Transcript ka tarjuma |
-| ↳ `translate_cues(cues, target)` | Cues ka tarjuma, 80 cues per batch |
-| ↳ `quiz(text, n, difficulty, language)` | MCQs |
-| ↳ `notes(text, language)` | Study notes |
-| `quiz_to_markdown(q)` | Quiz → `.md` text with answers |
+| Naam                                                                                                           | Kya karta hai                                                                                                     |
+| -------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `AnswerOption`, `Question`, `Quiz`                                                                       | Quiz ka JSON schema (pydantic): option ka`text`, `is_correct`, `rationale`; question ka `hint`, `topic` |
+| `TranslatedCue`, `TranslatedCues`                                                                          | Cue translation ka schema (`index` + `text`) taake timing map ho sake                                         |
+| `StudyNotes`                                                                                                 | `summary`, `key_points`, `keywords`, `chapters`                                                           |
+| `TRANSLATE_PROMPT`, `TRANSLATE_CUES_PROMPT`, `QUIZ_PROMPT`, `URDU_SCRIPT_FIX_PROMPT`, `NOTES_PROMPT` | Saare prompts (technical terms English, Urdu script, Roman Urdu nahi)                                             |
+| `MAX_CHARS`                                                                                                  | Transcript ka max hissa jo prompt mein jata hai (120k chars)                                                      |
+| `retry_delay_seconds(e)`                                                                                     | Error se "retry in 1.2s" parse                                                                                    |
+| `classify_error(e)`                                                                                          | `transient` / `quota` / `billing` / `model_gone` / `fatal`                                              |
+| `class QuotaExhaustedError`                                                                                  | Jab saari keys aur models khatam                                                                                  |
+| `has_devanagari(text)`                                                                                       | Hindi script hai ya nahi                                                                                          |
+| `_clean(text)`                                                                                               | Model ke`` ``` `` ya `---` hatana                                                                               |
+| `class ContentGenerator`                                                                                     | Text generation with rotation                                                                                     |
+| ↳`__init__(api_key, model, api_keys, models)`                                                               | Keys aur models ki lists                                                                                          |
+| ↳`model`, `client` (properties)                                                                           | Current model / current key ka client                                                                             |
+| ↳`_advance(kind)`                                                                                           | Agla model, phir agli key                                                                                         |
+| ↳`_generate(prompt, cfg)`                                                                                   | `generate_content` + backoff (3/6/12 s) + rotation logic                                                        |
+| ↳`_text(prompt)`                                                                                            | Plain text jawab                                                                                                  |
+| ↳`_json(prompt, schema)`                                                                                    | JSON jawab jo pydantic schema mein parse hota hai                                                                 |
+| ↳`fix_urdu_script(text)`                                                                                    | Devanagari → Urdu script (blocks mein)                                                                           |
+| ↳`fix_urdu_script_cues(cues)`                                                                               | Wahi, subtitles ke liye timing rakh kar                                                                           |
+| ↳`translate(text, target)`                                                                                  | Transcript ka tarjuma                                                                                             |
+| ↳`translate_cues(cues, target)`                                                                             | Cues ka tarjuma, 80 cues per batch                                                                                |
+| ↳`quiz(text, n, difficulty, language)`                                                                      | MCQs                                                                                                              |
+| ↳`notes(text, language)`                                                                                    | Study notes                                                                                                       |
+| `quiz_to_markdown(q)`                                                                                        | Quiz →`.md` text with answers                                                                                  |
 
 #### `transcriptogen/youtube.py`
 
-| Naam | Kya karta hai |
-| --- | --- |
-| `is_url(text)` | `http://` / `https://` se shuru hai? |
-| `download_audio(url, out_dir, max_minutes)` | yt-dlp se best audio → mp3; `(path, {title, duration, id})` return |
+| Naam                                          | Kya karta hai                                                        |
+| --------------------------------------------- | -------------------------------------------------------------------- |
+| `is_url(text)`                              | `http://` / `https://` se shuru hai?                             |
+| `download_audio(url, out_dir, max_minutes)` | yt-dlp se best audio → mp3;`(path, {title, duration, id})` return |
 
 #### `transcriptogen/live.py` – real-time captions
 
-| Naam | Kya karta hai |
-| --- | --- |
-| `LIVE_MODEL`, `SAMPLE_RATE`, `BYTES_PER_100MS` | Model ka naam, 16 kHz, 100 ms ka chunk size |
-| `class LiveEvent` | `text` + `final` (True = confirmed line, False = interim) |
-| `file_to_pcm(path)` | Koi bhi file → raw 16-bit PCM mono 16 kHz (ffmpeg) |
-| `_live_config(...)` | `LiveConnectConfig` banana (language, smart mode, vocabulary, manual VAD) |
-| `transcribe_stream(chunks, ...)` | Async generator: PCM chunks bhejo, `LiveEvent` receive karo; sender/receiver tasks, idle timeout |
-| `pcm_chunks(pcm)` | Bytes ko 100 ms tukron mein |
-| `transcribe_file_live(path)` | Shortcut: file → final text |
+| Naam                                                 | Kya karta hai                                                                                     |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `LIVE_MODEL`, `SAMPLE_RATE`, `BYTES_PER_100MS` | Model ka naam, 16 kHz, 100 ms ka chunk size                                                       |
+| `class LiveEvent`                                  | `text` + `final` (True = confirmed line, False = interim)                                     |
+| `file_to_pcm(path)`                                | Koi bhi file → raw 16-bit PCM mono 16 kHz (ffmpeg)                                               |
+| `_live_config(...)`                                | `LiveConnectConfig` banana (language, smart mode, vocabulary, manual VAD)                       |
+| `transcribe_stream(chunks, ...)`                   | Async generator: PCM chunks bhejo,`LiveEvent` receive karo; sender/receiver tasks, idle timeout |
+| `pcm_chunks(pcm)`                                  | Bytes ko 100 ms tukron mein                                                                       |
+| `transcribe_file_live(path)`                       | Shortcut: file → final text                                                                      |
 
 #### `app.py` – Streamlit UI
 
-| Hissa | Kya karta hai |
-| --- | --- |
-| CSS block | Sidebar hide, RTL text area styling |
-| `_is_rtl(text)` | Urdu/Arabic hai to RTL |
-| `show_full_text(text, key)` | Poora text scrollable text area mein (RTL support) |
-| `show_code_full(text, key)` | SRT/VTT ka poora preview |
-| `build_cues(result, fixed_cues)` | Words se cues, ya Urdu-fixed cues, ya text fallback |
-| `safe_name(stem)` | File name se ajeeb characters hatana |
-| `reset_outputs()` | Naye transcript par purani translation/quiz/notes clear |
-| Step 1 block | Upload/URL, settings, `TranscribeOptions`, background thread mein `transcribe()`, elapsed/ETA timer, Devanagari fix |
-| Step 2 block | Tabs: Transcript, Speakers, SRT, VTT (download + full preview) |
-| Step 3 block | Tabs: Translation, Quiz (form + scoring), Notes; har ek apne button par |
+| Hissa                              | Kya karta hai                                                                                                          |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| CSS block                          | Sidebar hide, RTL text area styling                                                                                    |
+| `_is_rtl(text)`                  | Urdu/Arabic hai to RTL                                                                                                 |
+| `show_full_text(text, key)`      | Poora text scrollable text area mein (RTL support)                                                                     |
+| `show_code_full(text, key)`      | SRT/VTT ka poora preview                                                                                               |
+| `build_cues(result, fixed_cues)` | Words se cues, ya Urdu-fixed cues, ya text fallback                                                                    |
+| `safe_name(stem)`                | File name se ajeeb characters hatana                                                                                   |
+| `reset_outputs()`                | Naye transcript par purani translation/quiz/notes clear                                                                |
+| Step 1 block                       | Upload/URL, settings,`TranscribeOptions`, background thread mein `transcribe()`, elapsed/ETA timer, Devanagari fix |
+| Step 2 block                       | Tabs: Transcript, Speakers, SRT, VTT (download + full preview)                                                         |
+| Step 3 block                       | Tabs: Translation, Quiz (form + scoring), Notes; har ek apne button par                                                |
 
 #### `cli.py`
 
@@ -332,11 +332,11 @@ Neeche har file ke functions/classes hain, is order mein jis order mein file mei
 
 #### `tests/`
 
-| File | Kya test karta hai |
-| --- | --- |
+| File                    | Kya test karta hai                                                                                                                              |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | `test_transcriber.py` | `parse_offset`, `normalise_speaker`, `build_transcription_config`, chunk minutes, `extract_words` (fake response), `estimate_seconds` |
-| `test_subtitles.py` | `fmt_time`, cue splitting (gap/speaker/length), SRT/VTT format, text fallback, speaker transcript |
-| `test_generators.py` | `classify_error`, retry/rotation (transient, quota, billing, exhausted), `has_devanagari`, `_clean`, `fix_urdu_script` |
+| `test_subtitles.py`   | `fmt_time`, cue splitting (gap/speaker/length), SRT/VTT format, text fallback, speaker transcript                                             |
+| `test_generators.py`  | `classify_error`, retry/rotation (transient, quota, billing, exhausted), `has_devanagari`, `_clean`, `fix_urdu_script`                  |
 
 ---
 
@@ -410,7 +410,7 @@ Known limitation: Urdu ke beech bole gaye English words (jaise "vocabulary") spe
 
 ### Keys kahan se
 
-1. <https://aistudio.google.com/app/apikey> → project chuno → Create API key.
+1. [https://aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey) → project chuno → Create API key.
 2. Us project mein **billing enable** karo ya prepaid credits daalo (transcribe model ke liye zaroori).
 3. `.env` mein `GEMINI_API_KEY=` ke aage paste karo.
 
@@ -425,19 +425,19 @@ Har model ke sirf ~**20 requests per day** aur chhoti per-minute limit. Isliye c
 
 ### Errors aur unka hal
 
-| Error message | Matlab | Hal |
-| --- | --- | --- |
-| `GEMINI_API_KEY is not set` | `.env` nahi ya khali | `.env` banao, key paste karo, app restart |
-| `API key not valid` | Key ghalat / expire | AI Studio se nayi key |
-| `429 ... prepayment credits are depleted` | Project ka balance zero | ai.studio/projects → Billing → credits add karo, ya doosre project ki key |
-| `429 ... free_tier_requests, limit: 20` | Us model ka daily quota khatam | Code khud agla model/key try karta hai; sab khatam hon to `GEMINI_API_KEY_2` add karo ya kal chalao |
-| `503 ... high demand` | Google busy | Code khud 3/6/12 s wait kar ke retry karta hai, phir fallback model |
-| `404 ... gemini-2.5-flash no longer available` | Purana model naye keys ke liye band | Hum `gemini-3.6-flash` use karte hain, kuch nahi karna |
-| `ffmpeg not found` | FFmpeg install/PATH nahi | `winget install Gyan.FFmpeg`, terminal restart; ya `.env` mein `FFMPEG_PATH=C:\...\ffmpeg.exe` |
-| `ImportError: cannot import name ...` app mein | Purana Streamlit process, code badla hai | Ctrl+C se app band, dobara `uv run streamlit run app.py` |
-| Transcript Hindi mein | Language hint auto tha | Hint `Urdu + English` rakho; fix checkbox on rakho |
-| Subtitles ki timing andaze se | Word timestamps off the | Verbatim mode + Word timestamps on |
-| YouTube download fail | yt-dlp purana / video private | `uv add yt-dlp --upgrade`; public video use karo |
+| Error message                                    | Matlab                                   | Hal                                                                                                  |
+| ------------------------------------------------ | ---------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `GEMINI_API_KEY is not set`                    | `.env` nahi ya khali                   | `.env` banao, key paste karo, app restart                                                          |
+| `API key not valid`                            | Key ghalat / expire                      | AI Studio se nayi key                                                                                |
+| `429 ... prepayment credits are depleted`      | Project ka balance zero                  | ai.studio/projects → Billing → credits add karo, ya doosre project ki key                          |
+| `429 ... free_tier_requests, limit: 20`        | Us model ka daily quota khatam           | Code khud agla model/key try karta hai; sab khatam hon to`GEMINI_API_KEY_2` add karo ya kal chalao |
+| `503 ... high demand`                          | Google busy                              | Code khud 3/6/12 s wait kar ke retry karta hai, phir fallback model                                  |
+| `404 ... gemini-2.5-flash no longer available` | Purana model naye keys ke liye band      | Hum`gemini-3.6-flash` use karte hain, kuch nahi karna                                              |
+| `ffmpeg not found`                             | FFmpeg install/PATH nahi                 | `winget install Gyan.FFmpeg`, terminal restart; ya `.env` mein `FFMPEG_PATH=C:\...\ffmpeg.exe` |
+| `ImportError: cannot import name ...` app mein | Purana Streamlit process, code badla hai | Ctrl+C se app band, dobara`uv run streamlit run app.py`                                            |
+| Transcript Hindi mein                            | Language hint auto tha                   | Hint`Urdu + English` rakho; fix checkbox on rakho                                                  |
+| Subtitles ki timing andaze se                    | Word timestamps off the                  | Verbatim mode + Word timestamps on                                                                   |
+| YouTube download fail                            | yt-dlp purana / video private            | `uv add yt-dlp --upgrade`; public video use karo                                                   |
 
 ---
 
@@ -472,11 +472,11 @@ Nayi package add karni ho: `uv add package-name` (phir `uv export --no-hashes --
 
 Real runs par naapa gaya (2026-09-07):
 
-| Audio | Diarization + timestamps | Plain |
-| --- | --- | --- |
-| 25 sec | ~5 s | ~4 s |
-| 6.5 min | ~22 s | ~12 s |
-| 1 ghanta (andaza) | ~3.5 min (3 chunks) | ~2 min |
+| Audio             | Diarization + timestamps | Plain  |
+| ----------------- | ------------------------ | ------ |
+| 25 sec            | ~5 s                     | ~4 s   |
+| 6.5 min           | ~22 s                    | ~12 s  |
+| 1 ghanta (andaza) | ~3.5 min (3 chunks)      | ~2 min |
 
 App Step 1 mein chalte waqt **elapsed / estimated / remaining** dikhati hai. Estimate `transcriber.estimate_seconds()` mein hai.
 
@@ -497,7 +497,7 @@ App Step 1 mein chalte waqt **elapsed / estimated / remaining** dikhati hai. Est
 - [ ] FastAPI backend + React/Next.js frontend (Streamlit abhi prototype UI hai)
 - [ ] User accounts aur history (PostgreSQL)
 - [ ] Video player jisme transcript ka lafz highlight ho (word timestamps already hain)
-- [x] Real-time captions (`live.py` / `live_demo.py`), UI mein integrate karna baqi
+- [X] Real-time captions (`live.py` / `live_demo.py`), UI mein integrate karna baqi
 - [ ] AI dubbing: translated cues par TTS
 - [ ] Custom vocabulary ko diarization ke saath use karne ka workaround (post-processing)
 
@@ -505,17 +505,17 @@ App Step 1 mein chalte waqt **elapsed / estimated / remaining** dikhati hai. Est
 
 ## 15. Glossary
 
-| Term | Matlab |
-| --- | --- |
-| Transcription / ASR | Awaz ko text mein badalna (Automatic Speech Recognition) |
-| Diarization | Ye pehchanna ke kaun sa hissa kis speaker ne bola |
-| Word timestamps | Har lafz ka start/end time (seconds) |
-| Cue | Subtitle ki ek entry (number, time range, text) |
-| SRT / VTT | Subtitle file formats (SubRip / WebVTT) |
-| Chunk | Lambi audio ka tukra jo alag request mein jata hai |
-| Interactions API | Google ka naya API jis se transcribe model call hota hai |
-| Live API | WebSocket based streaming API (real-time) |
-| BCP-47 code | Language code jaise `ur-PK`, `en-US` |
-| Quota / rate limit | Kitni requests allowed hain (per minute / per day) |
-| uv | Python package/venv manager (`uv add`, `uv run`, `uv sync`) |
-| Streamlit | Python se web UI banane ki library |
+| Term                | Matlab                                                            |
+| ------------------- | ----------------------------------------------------------------- |
+| Transcription / ASR | Awaz ko text mein badalna (Automatic Speech Recognition)          |
+| Diarization         | Ye pehchanna ke kaun sa hissa kis speaker ne bola                 |
+| Word timestamps     | Har lafz ka start/end time (seconds)                              |
+| Cue                 | Subtitle ki ek entry (number, time range, text)                   |
+| SRT / VTT           | Subtitle file formats (SubRip / WebVTT)                           |
+| Chunk               | Lambi audio ka tukra jo alag request mein jata hai                |
+| Interactions API    | Google ka naya API jis se transcribe model call hota hai          |
+| Live API            | WebSocket based streaming API (real-time)                         |
+| BCP-47 code         | Language code jaise`ur-PK`, `en-US`                           |
+| Quota / rate limit  | Kitni requests allowed hain (per minute / per day)                |
+| uv                  | Python package/venv manager (`uv add`, `uv run`, `uv sync`) |
+| Streamlit           | Python se web UI banane ki library                                |
