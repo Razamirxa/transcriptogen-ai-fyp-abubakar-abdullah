@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import json
 import tempfile
+import threading
+import time
 from pathlib import Path
 
 import streamlit as st
@@ -26,7 +28,7 @@ from transcriptogen.subtitles import (
     to_srt,
     to_vtt,
 )
-from transcriptogen.transcriber import GeminiTranscriber
+from transcriptogen.transcriber import GeminiTranscriber, fmt_eta
 from transcriptogen.youtube import download_audio, is_url
 
 st.set_page_config(page_title="TranscriptoGen AI", page_icon="🎧", layout="wide",
@@ -36,10 +38,10 @@ st.markdown(
     """
 <style>
 [data-testid="stSidebar"], [data-testid="collapsedControl"] { display: none; }
-.rtl { direction: rtl; text-align: right; font-family: 'Noto Nastaliq Urdu','Jameel Noori Nastaleeq',
-       'Noto Naskh Arabic', serif; font-size: 1.15rem; line-height: 2.1; white-space: pre-wrap; }
-.ltr { white-space: pre-wrap; font-family: ui-monospace, Consolas, monospace; font-size: 0.92rem; line-height: 1.6; }
-.box { max-height: 560px; overflow: auto; border: 1px solid #ddd; padding: 14px; border-radius: 8px; background: #fafafa; }
+/* full-text previews are native text areas: theme-safe, scrollable, copyable */
+.preview textarea { font-size: 0.95rem !important; line-height: 1.7 !important; }
+.preview.rtl textarea { direction: rtl; text-align: right; font-size: 1.15rem !important; line-height: 2.1 !important;
+       font-family: 'Noto Nastaliq Urdu','Jameel Noori Nastaleeq','Noto Naskh Arabic', serif !important; }
 </style>
 """,
     unsafe_allow_html=True,
@@ -58,15 +60,27 @@ def _is_rtl(text: str) -> bool:
     return sum("؀" <= ch <= "ۿ" for ch in sample) > len(sample) * 0.2
 
 
-def show_full_text(text: str) -> None:
-    """Full, scrollable preview (no truncation) with RTL support."""
-    cls = "rtl" if _is_rtl(text) else "ltr"
-    st.markdown(f'<div class="box {cls}">{_escape(text)}</div>', unsafe_allow_html=True)
+def show_full_text(text: str, key: str, height: int = 560) -> None:
+    """Full, scrollable, copyable preview (no truncation); RTL styling for Urdu/Arabic.
+
+    A native text area is used on purpose: it is theme-safe (no custom colours),
+    never truncated and copy friendly. st.container(key=...) exposes the CSS
+    class st-key-<key>, which lets us style only this text area.
+    """
+    with st.container(key=f"wrap_{key}"):
+        if _is_rtl(text):
+            st.markdown(
+                f"<style>.st-key-wrap_{key} textarea {{ direction: rtl; text-align: right; font-size: 1.15rem; "
+                "line-height: 2.1; font-family: 'Noto Nastaliq Urdu','Jameel Noori Nastaleeq',"
+                "'Noto Naskh Arabic', serif; }}</style>",
+                unsafe_allow_html=True,
+            )
+        st.text_area("preview", value=text, height=height, key=key, label_visibility="collapsed")
 
 
 def show_code_full(text: str, key: str) -> None:
-    """Full preview of SRT/VTT etc. in a scrollable text area (copy friendly)."""
-    st.text_area("", value=text, height=520, key=key, label_visibility="collapsed")
+    """Full preview of SRT/VTT/JSON in a scrollable text area (copy friendly)."""
+    st.text_area("preview", value=text, height=520, key=key, label_visibility="collapsed")
 
 
 def build_cues(result, fixed_cues):
@@ -161,10 +175,8 @@ if run:
     reset_outputs()
     prog = st.progress(0.0)
     status = st.empty()
-
-    def progress(msg: str, frac: float) -> None:
-        status.info(msg)
-        prog.progress(min(max(frac, 0.0), 1.0))
+    timer = st.empty()
+    t_start = time.time()
 
     tmp_path: Path | None = None
     try:
@@ -175,12 +187,45 @@ if run:
                 tmp_path = Path(f.name)
             stem = Path(uploaded.name).stem
         else:
-            progress("Downloading audio with yt-dlp...", 0.01)
+            status.info("Downloading audio with yt-dlp...")
             tmp_path, info = download_audio(url)
             stem = info.get("title") or "youtube"
             st.caption(f"Downloaded: **{stem}** ({(info.get('duration') or 0) / 60:.1f} min)")
 
-        result = GeminiTranscriber(api_keys=API_KEYS).transcribe(tmp_path, opts, progress)
+        # Run the transcription in a worker thread so the UI can tick elapsed / remaining time.
+        state = {"msg": "Starting...", "frac": 0.0, "result": None, "error": None, "est": None}
+        transcriber = GeminiTranscriber(api_keys=API_KEYS)
+
+        def progress(msg: str, frac: float) -> None:      # called from the worker thread
+            state["msg"], state["frac"] = msg, frac
+            state["est"] = transcriber.last_estimate
+
+        def work() -> None:
+            try:
+                state["result"] = transcriber.transcribe(tmp_path, opts, progress)
+            except Exception as e:  # surfaced in the main thread
+                state["error"] = e
+
+        th = threading.Thread(target=work, daemon=True)
+        th.start()
+        while th.is_alive():
+            elapsed = time.time() - t_start
+            est = state["est"]
+            status.info(state["msg"])
+            if est:
+                remaining = max(est - elapsed, 0.0)
+                frac = max(state["frac"], min(elapsed / (est * 1.15), 0.95))
+                timer.caption(f"⏱️ Elapsed {fmt_eta(elapsed)} · estimated total ~{fmt_eta(est)} · "
+                              f"remaining ~{fmt_eta(remaining) if remaining > 0 else 'almost done'}")
+            else:
+                frac = state["frac"]
+                timer.caption(f"⏱️ Elapsed {fmt_eta(elapsed)}")
+            prog.progress(min(max(frac, 0.0), 1.0))
+            time.sleep(0.5)
+        th.join()
+        if state["error"]:
+            raise state["error"]
+        result = state["result"]
 
         fixed_cues = None
         if fix_script and has_devanagari(result.text):
@@ -198,7 +243,10 @@ if run:
             except Exception:
                 pass
 
+    prog.progress(1.0)
     st.session_state.update(result=result, fixed_cues=fixed_cues, stem=stem, translations={})
+    took = time.time() - t_start
+    timer.caption(f"⏱️ Took {fmt_eta(took)} (estimate was ~{fmt_eta(transcriber.last_estimate or 0)})")
     status.success(
         f"Done · {result.duration / 60:.1f} min · {result.chunks} chunk(s) · {len(result.words)} timed words · "
         f"speakers: {', '.join(result.speakers) or 'n/a'}"
@@ -226,13 +274,13 @@ t_txt, t_spk, t_srt, t_vtt, t_json = st.tabs(["📝 Transcript", "🗣️ Speake
 
 with t_txt:
     st.download_button("⬇️ Download .txt", result.text, f"{stem}.txt", "text/plain", key="dl_txt")
-    show_full_text(result.text)
+    show_full_text(result.text, "transcript_full")
 
 with t_spk:
     if result.words and result.speakers:
         sp = speaker_transcript(result.words)
         st.download_button("⬇️ Download speakers .txt", sp, f"{stem}.speakers.txt", "text/plain", key="dl_spk")
-        show_full_text(sp)
+        show_full_text(sp, "speakers_full")
     else:
         st.info("Enable speaker diarization (Verbatim mode) to get speaker-attributed output.")
 
@@ -289,7 +337,7 @@ with x_tr:
         d3.download_button("⬇️ Translated .vtt", tr["vtt"], f"{stem}.{pick}.vtt", key=f"dl_tr_vtt_{pick}")
         p1, p2 = st.tabs(["Text", "SRT"])
         with p1:
-            show_full_text(tr["text"])
+            show_full_text(tr["text"], f"tr_text_{pick}")
         with p2:
             show_code_full(tr["srt"], f"tr_srt_{pick}")
 

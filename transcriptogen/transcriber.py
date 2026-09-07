@@ -161,6 +161,29 @@ def _classify(e: Exception) -> str:
 
 
 # ----------------------------------------------------------------------------
+# Time estimate (calibrated 2026-09-07: 392 s audio -> 21.5 s with diarization +
+# timestamps, 12.3 s plain; 25 s audio -> ~4.5 s; ffmpeg ~1 s per 6 min)
+# ----------------------------------------------------------------------------
+def estimate_seconds(duration: float, opts: TranscribeOptions, size_bytes: int = 0) -> float:
+    """Rough wall-clock estimate for transcribe() on `duration` seconds of media."""
+    chunk = opts.chunk_minutes * 60
+    n_chunks = max(1, int(-(-duration // chunk)))          # ceil
+    per_sec = 0.055 if opts.annotated else 0.032
+    api = n_chunks * 3.0 + duration * per_sec
+    ffmpeg = 2.0 + duration * 0.004
+    upload = (size_bytes / (2 * 1024 * 1024)) if size_bytes > config.INLINE_LIMIT_BYTES else 0.0
+    return api + ffmpeg + upload
+
+
+def fmt_eta(seconds: float) -> str:
+    seconds = max(0.0, seconds)
+    if seconds < 60:
+        return f"{int(round(seconds))}s"
+    m, s = divmod(int(round(seconds)), 60)
+    return f"{m}m {s:02d}s"
+
+
+# ----------------------------------------------------------------------------
 # Client wrapper
 # ----------------------------------------------------------------------------
 class GeminiTranscriber:
@@ -175,6 +198,7 @@ class GeminiTranscriber:
         self._ki = 0
         self._clients: dict[str, genai.Client] = {}
         self.model = model
+        self.last_estimate: float | None = None   # seconds, set by transcribe()
 
     @property
     def client(self) -> genai.Client:
@@ -281,6 +305,10 @@ class GeminiTranscriber:
 
         progress("Reading media info...", 0.02)
         total = duration_seconds(media_path)
+        est = estimate_seconds(total, opts, media_path.stat().st_size)
+        self.last_estimate = est
+        progress(f"Media length {fmt_eta(total)} · estimated processing time ~{fmt_eta(est)} "
+                 f"(range {fmt_eta(est * 0.7)} - {fmt_eta(est * 1.8)})", 0.04)
 
         progress("Extracting / normalising audio with FFmpeg...", 0.05)
         audio = extract_audio(media_path)

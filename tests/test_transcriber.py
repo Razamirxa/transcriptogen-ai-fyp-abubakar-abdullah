@@ -70,6 +70,20 @@ def test_extract_words_with_offset():
     assert words[0].speaker == "Speaker 1" and words[1].speaker == "Speaker 2"
 
 
+def test_estimate_seconds_is_sane():
+    from transcriptogen.transcriber import estimate_seconds, fmt_eta
+
+    annotated = TranscribeOptions(diarization=True, word_timestamps=True)
+    plain = TranscribeOptions(diarization=False, word_timestamps=False)
+    e_short = estimate_seconds(25, annotated)
+    e_long = estimate_seconds(392, annotated)
+    assert 4 <= e_short <= 12                      # measured ~5 s
+    assert 18 <= e_long <= 35                      # measured ~22 s
+    assert estimate_seconds(392, plain) < e_long   # plain mode is faster
+    assert estimate_seconds(3600 * 1.5, annotated) > estimate_seconds(3600, annotated)  # more chunks
+    assert fmt_eta(45) == "45s" and fmt_eta(125) == "2m 05s"
+
+
 def test_extract_words_handles_missing_steps():
     assert extract_words(SimpleNamespace(output_text="x", steps=None)) == []
     assert extract_words({"output_text": "x"}) == []

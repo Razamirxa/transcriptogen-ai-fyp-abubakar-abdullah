@@ -61,8 +61,10 @@ def main(argv: list[str] | None = None) -> int:
         print(f"[{frac * 100:5.1f}%] {msg}")
 
     t0 = time.time()
-    result = GeminiTranscriber().transcribe(path, opts, progress)
+    tr = GeminiTranscriber()
+    result = tr.transcribe(path, opts, progress)
     print(f"Transcribed {result.duration:.0f}s of audio in {time.time() - t0:.1f}s "
+          f"(estimate was ~{tr.last_estimate:.0f}s) "
           f"({result.chunks} chunk(s), {len(result.words)} words, speakers={result.speakers})")
 
     if result.words:
