@@ -1,0 +1,21 @@
+[project]
+name = "transcriptogen-ai"
+version = "0.1.0"
+description = "TranscriptoGen AI - transcription, subtitles, translation and quiz generation with Gemini 3.5 Transcribe"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "google-genai>=2.22.0",
+    "python-dotenv>=1.2.3",
+    "streamlit>=1.63.0",
+    "yt-dlp>=2026.8.19",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

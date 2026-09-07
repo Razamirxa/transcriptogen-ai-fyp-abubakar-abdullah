@@ -1,0 +1,19 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Secrets & local artefacts
+.env
+outputs/
+samples/*.mp4
+samples/*.mp3
+*.tmp
+.streamlit/secrets.toml
+samples/sample_urdu.mp3
