@@ -9,7 +9,6 @@ Run:  uv run streamlit run app.py
 """
 from __future__ import annotations
 
-import json
 import tempfile
 import threading
 import time
@@ -270,7 +269,7 @@ st.caption(
     f"{fmt_time(cues[-1].end, ms=False) if cues else '-'} · media length {fmt_time(result.duration or 0, ms=False)}"
 )
 
-t_txt, t_spk, t_srt, t_vtt, t_json = st.tabs(["📝 Transcript", "🗣️ Speakers", "🎞️ SRT", "🎞️ VTT", "🧾 JSON"])
+t_txt, t_spk, t_srt, t_vtt = st.tabs(["📝 Transcript", "🗣️ Speakers", "🎞️ SRT", "🎞️ VTT"])
 
 with t_txt:
     st.download_button("⬇️ Download .txt", result.text, f"{stem}.txt", "text/plain", key="dl_txt")
@@ -293,13 +292,6 @@ with t_srt:
 with t_vtt:
     st.download_button("⬇️ Download .vtt", vtt, f"{stem}.vtt", "text/vtt", key="dl_vtt")
     show_code_full(vtt, "vtt_full")
-
-with t_json:
-    payload = json.dumps(result.to_dict(), ensure_ascii=False, indent=2)
-    st.download_button("⬇️ Download .json", payload, f"{stem}.json", "application/json", key="dl_json")
-    show_code_full(payload, "json_full")
-    if result.usage:
-        st.caption(f"Usage: {result.usage}")
 
 # ---------------------------------------------------------------------------
 # Step 3 - extras, each on its own button
@@ -384,9 +376,7 @@ with x_quiz:
                 label = letters[correct_j] if correct_j is not None else "?"
                 (st.success if ok else st.error)(f"Q{i + 1}: {'Correct' if ok else 'Wrong'} · answer {label}. {why}")
             st.metric("Score", f"{score}/{len(q.questions)}")
-        m1, m2 = st.columns(2)
-        m1.download_button("⬇️ Quiz .md", quiz_to_markdown(q), f"{stem}.quiz.md", key="dl_quiz_md")
-        m2.download_button("⬇️ Quiz .json", q.model_dump_json(indent=2), f"{stem}.quiz.json", key="dl_quiz_json")
+        st.download_button("⬇️ Quiz .md", quiz_to_markdown(q), f"{stem}.quiz.md", key="dl_quiz_md")
 
 # ---- notes ----------------------------------------------------------------
 with x_notes:
@@ -412,4 +402,8 @@ with x_notes:
         for i, ch in enumerate(n.chapters, 1):
             st.markdown(f"{i}. {ch}")
         st.markdown("**Keywords:** " + ", ".join(n.keywords))
-        st.download_button("⬇️ Notes .json", n.model_dump_json(indent=2), f"{stem}.notes.json", key="dl_notes")
+        notes_md = (f"# Notes: {stem}\n\n## Summary\n{n.summary}\n\n## Key points\n"
+                    + "\n".join(f"- {k}" for k in n.key_points)
+                    + "\n\n## Chapters\n" + "\n".join(f"{i}. {c}" for i, c in enumerate(n.chapters, 1))
+                    + "\n\n**Keywords:** " + ", ".join(n.keywords) + "\n")
+        st.download_button("⬇️ Notes .md", notes_md, f"{stem}.notes.md", key="dl_notes")
