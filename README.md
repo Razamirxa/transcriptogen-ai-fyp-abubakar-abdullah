@@ -140,6 +140,53 @@ Naya transcript generate karoge to purani translation/quiz/notes clear ho jayeng
 
 ---
 
+## 4A. Final product: Web app + REST API (FastAPI)
+
+Streamlit prototype ke ilawa ab **asli web app** hai: FastAPI backend + designed frontend (light/dark theme, 3D hero, live transcription graphic), sab ek server se.
+
+```powershell
+uv run uvicorn backend.main:app --reload --port 8000
+```
+
+- Web app: <http://localhost:8000/>
+- API docs (Swagger, har endpoint try kar sakte ho): <http://localhost:8000/docs>
+
+### Endpoints
+
+| Method | Path | Kya karta hai |
+| --- | --- | --- |
+| GET | `/api/health` | keys aur ffmpeg ka status |
+| GET | `/api/config` | models, language options, translation targets |
+| POST | `/api/transcribe` | multipart `file` + settings (`language_codes`, `diarization`, `word_timestamps`, `smart_mode`, `custom_vocabulary`, `fix_urdu_script`) → `{job_id}` |
+| POST | `/api/transcribe/url` | JSON `{url, ...settings}` → `{job_id}` (YouTube etc.) |
+| GET | `/api/jobs/{id}` | progress: `message`, `fraction`, `elapsed`, `estimate`, `remaining` (poll har ~1 s) |
+| GET | `/api/jobs/{id}/result` | `text`, `speakers_text`, `words[]`, `cues[]`, `srt`, `vtt`, `speakers`, `duration`, `took_seconds` |
+| GET | `/api/jobs/{id}/download/{txt\|speakers\|srt\|vtt}` | file download |
+| POST | `/api/images/analyse` | multipart `images[]` + `language` → OCR + description + key points (+ markdown) |
+| POST | `/api/images/ask` | multipart `images[]` + `question` (+ `context`, `language`) → `{answer}` |
+| POST | `/api/generate/translate` | `{text, target, cues?}` → `text` (+ translated `cues`, `srt`, `vtt`) |
+| POST | `/api/generate/quiz` | `{text, n, difficulty, language}` → `{markdown, data}` |
+| POST | `/api/generate/notes` / `points` / `minutes` | `{text, language}` → `{markdown, data}` |
+| WS | `/ws/live?lang=ur-PK` | binary PCM (16 kHz mono s16le) bhejo, `{"text","final"}` JSON aata hai; `"end"` bhej kar khatam |
+
+Flow (frontend yehi karta hai): `POST /api/transcribe` → job id → `GET /api/jobs/{id}` poll (progress bar + ETA) → `GET /api/jobs/{id}/result` → tabs/downloads → Step 4 buttons `POST /api/generate/*` (source = transcript + image text).
+
+### Frontend (`frontend/`)
+
+- `index.html` – landing (hero with 3D cube, orbit ring, floating live-transcript card, isometric step tiles) + app section (Steps 1-4).
+- `styles.css` – design tokens (`:root` light, `[data-theme="dark"]` dark), 3D keyframes, components.
+- `app.js` – theme toggle (localStorage), hero demo animation, API calls, job polling, tabs, quiz scoring, markdown rendering.
+- Vanilla JS hai (koi build step nahi). Next.js/React mein port karna ho to same endpoints use hote hain; `API` constant se base URL badal sakte ho.
+
+### Backend (`backend/`)
+
+- `main.py` – FastAPI app, saare routes, WebSocket, static serving.
+- `jobs.py` – in-memory job store: transcription worker thread mein, progress/ETA, result + cues cache.
+- `schemas.py` – request/response models (Swagger inhi se banta hai).
+- Tests: `tests/test_api.py` (fake transcriber ke saath job lifecycle, validation, downloads).
+
+Deploy: `requirements.txt` + `packages.txt` (ffmpeg) ready hain; Docker/Cloud Run ke liye `uvicorn backend.main:app --host 0.0.0.0 --port 8080`.
+
 ## 5. Command line (CLI) se chalana
 
 UI ke bina, batch ya testing ke liye:

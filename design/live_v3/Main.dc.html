@@ -1,0 +1,433 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&amp;family=Manrope:wght@400;500;600;700&amp;family=Noto+Nastaliq+Urdu:wght@400;600&amp;display=swap">
+  <style>
+    body { margin: 0; font-family: 'Manrope', 'Segoe UI', system-ui, sans-serif; }
+    a { color: #4F46E5; text-decoration: none; } a:hover { color: #4338CA; }
+    .display { font-family: 'Syne', 'Trebuchet MS', system-ui, sans-serif; letter-spacing: -0.02em; }
+    .urdu { font-family: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', serif; }
+    .page { transition: background 0.35s ease, color 0.35s ease; }
+    .surface { background: var(--surface); border: 1px solid var(--border); transition: background 0.35s ease, border-color 0.35s ease, transform 0.3s ease; }
+    .card:hover { transform: translateY(-6px) rotateX(4deg) rotateY(-4deg); border-color: var(--accent); }
+    .btn:hover { filter: brightness(1.08); }
+    .muted { color: var(--muted); }
+    .faint { color: var(--faint); }
+    .ink { color: var(--text); }
+    @keyframes wave { 0%, 100% { transform: scaleY(0.25); } 50% { transform: scaleY(1); } }
+    .bar { animation: wave 1.4s ease-in-out infinite; transform-origin: center; will-change: transform; }
+    @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    .marquee { animation: marquee 28s linear infinite; }
+    @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+    .rise { animation: rise 0.8s cubic-bezier(.2,.7,.2,1) both; }
+    .rise-2 { animation-delay: 0.15s; } .rise-3 { animation-delay: 0.3s; } .rise-4 { animation-delay: 0.45s; }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.15; } }
+    .live-dot { animation: blink 1.2s ease-in-out infinite; }
+    @keyframes progress { from { width: 8%; } to { width: 92%; } }
+    .progress { animation: progress 6s ease-in-out infinite alternate; }
+    /* ---- 3D ---- */
+    .stage { perspective: 1400px; perspective-origin: 60% 40%; }
+    .p3d { transform-style: preserve-3d; }
+    @keyframes spin { from { transform: rotateX(-18deg) rotateY(0deg); } to { transform: rotateX(-18deg) rotateY(360deg); } }
+    .cube { animation: spin 22s linear infinite; transform-style: preserve-3d; }
+    .face { position: absolute; inset: 0; border: 1px solid var(--accent); background: var(--faceBg); backdrop-filter: blur(2px);
+            background-image: repeating-linear-gradient(90deg, var(--accent) 0 6px, transparent 6px 14px); background-size: 100% 46%; background-repeat: no-repeat; background-position: center; }
+    @keyframes bob { 0%, 100% { transform: translateY(0) rotateY(-14deg) rotateX(6deg); } 50% { transform: translateY(-14px) rotateY(-11deg) rotateX(4deg); } }
+    .float-card { animation: bob 6s ease-in-out infinite; transform-style: preserve-3d; }
+    @keyframes bob2 { 0%, 100% { transform: translateZ(-90px) translateX(40px) translateY(30px) rotateY(-14deg) rotateX(6deg); } 50% { transform: translateZ(-90px) translateX(40px) translateY(18px) rotateY(-16deg) rotateX(7deg); } }
+    .stack-2 { animation: bob2 7s ease-in-out infinite; }
+    @keyframes bob3 { 0%, 100% { transform: translateZ(-180px) translateX(80px) translateY(60px) rotateY(-14deg) rotateX(6deg); } 50% { transform: translateZ(-180px) translateX(80px) translateY(44px) rotateY(-12deg) rotateX(5deg); } }
+    .stack-3 { animation: bob3 8s ease-in-out infinite; }
+    @keyframes orbit { from { transform: rotateX(72deg) rotateZ(0deg); } to { transform: rotateX(72deg) rotateZ(360deg); } }
+    .orbit { animation: orbit 26s linear infinite; transform-style: preserve-3d; }
+    @keyframes counter { from { transform: rotateZ(0deg) rotateX(-72deg); } to { transform: rotateZ(-360deg) rotateX(-72deg); } }
+    .chip3d { animation: counter 26s linear infinite; transform-style: preserve-3d; }
+    @keyframes tile { 0%, 100% { transform: rotateX(58deg) rotateZ(-42deg) translateZ(0); } 50% { transform: rotateX(58deg) rotateZ(-42deg) translateZ(22px); } }
+    .tile { animation: tile 5s ease-in-out infinite; transform-style: preserve-3d; }
+    .t-2 { animation-delay: 0.6s; } .t-3 { animation-delay: 1.2s; } .t-4 { animation-delay: 1.8s; }
+  </style>
+</helmet>
+
+<div class="page" style="--bg: {{t.bg}}; --surface: {{t.surface}}; --surface2: {{t.surface2}}; --border: {{t.border}}; --text: {{t.text}}; --muted: {{t.muted}}; --faint: {{t.faint}}; --accent: {{accent}}; --amber: {{t.amber}}; --faceBg: {{t.faceBg}}; --glow: {{t.glow}}; --grid: {{t.grid}}; width: 1440px; min-height: 3040px; background: var(--bg); color: var(--text); position: relative; overflow: hidden;">
+
+  <!-- atmosphere -->
+  <div style="position: absolute; top: -260px; left: -180px; width: 820px; height: 820px; border-radius: 999px; background: radial-gradient(closest-side, var(--glow), transparent 70%); filter: blur(30px); pointer-events: none;"></div>
+  <div style="position: absolute; top: 160px; right: -220px; width: 720px; height: 720px; border-radius: 999px; background: radial-gradient(closest-side, {{t.glowAmber}}, transparent 70%); filter: blur(30px); pointer-events: none;"></div>
+  <div style="position: absolute; inset: 0; background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size: 48px 48px; mask-image: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent 55%); pointer-events: none;"></div>
+
+  <!-- nav -->
+  <div style="position: relative; display: flex; align-items: center; justify-content: space-between; padding: 28px 72px;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <div style="width: 40px; height: 40px; border-radius: 12px; background: var(--accent); display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 24px -10px var(--accent);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round"><path d="M4 12v2M8 8v8M12 5v14M16 9v6M20 11v3"></path></svg>
+      </div>
+      <div class="display" style="font-size: 20px; font-weight: 800;">TranscriptoGen <span style="color: var(--accent);">AI</span></div>
+    </div>
+    <div class="muted" style="display: flex; align-items: center; gap: 36px; font-size: 15px; font-weight: 600;">
+      <div>Features</div><div>How it works</div><div>Languages</div><div>Pricing</div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div class="surface" onClick="{{toggleTheme}}" title="Toggle dark / light" style="display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 6px 0 14px; border-radius: 999px; cursor: pointer; font-size: 13px; font-weight: 700;">
+        <span class="muted">{{themeLabel}}</span>
+        <div style="position: relative; width: 52px; height: 30px; border-radius: 999px; background: {{t.switchTrack}}; transition: background 0.3s ease;">
+          <div style="position: absolute; top: 3px; left: {{t.knobLeft}}; width: 24px; height: 24px; border-radius: 999px; background: #FFFFFF; box-shadow: 0 2px 6px rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center; transition: left 0.3s ease;">
+            <sc-if value="{{isDark}}" hint-placeholder-val="{{false}}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E1B4B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path></svg>
+            </sc-if>
+            <sc-if value="{{isLight}}" hint-placeholder-val="{{true}}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+            </sc-if>
+          </div>
+        </div>
+      </div>
+      <div class="muted" style="padding: 12px 18px; font-size: 15px; font-weight: 600;">Sign in</div>
+      <div class="btn" style="height: 44px; display: flex; align-items: center; padding: 0 20px; border-radius: 12px; background: var(--text); color: var(--bg); font-size: 15px; font-weight: 700;">Open app</div>
+    </div>
+  </div>
+
+  <!-- hero -->
+  <div style="position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 40px; align-items: center; padding: 56px 72px 40px;">
+    <div style="display: flex; flex-direction: column; gap: 28px;">
+      <div class="rise surface" style="display: inline-flex; align-items: center; gap: 10px; align-self: flex-start; padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--muted);">
+        <span class="live-dot" style="width: 8px; height: 8px; border-radius: 999px; background: #10B981;"></span>
+        Gemini 3.5 Transcribe · 85+ languages · Urdu &amp; English mix
+      </div>
+      <h1 class="display rise rise-2" style="margin: 0; font-size: 66px; line-height: 1.02; font-weight: 800; color: var(--text);">
+        Every lecture, meeting and speech, turned into text you can <span style="color: var(--accent);">actually use.</span>
+      </h1>
+      <p class="rise rise-3 muted" style="margin: 0; max-width: 540px; font-size: 19px; line-height: 1.6; text-wrap: pretty;">
+        Upload a recording or paste a YouTube link. Get an accurate transcript with speakers, real-timed subtitles, translations, quizzes, notes and meeting minutes. Nothing runs until you press the button.
+      </p>
+      <div class="rise rise-4" style="display: flex; align-items: center; gap: 14px;">
+        <div class="btn" style="display: flex; align-items: center; gap: 10px; padding: 16px 24px; border-radius: 14px; background: var(--accent); color: #FFFFFF; font-size: 16px; font-weight: 700; box-shadow: 0 14px 40px -12px var(--accent);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"></path></svg>
+          Upload a recording
+        </div>
+        <div class="btn surface" style="display: flex; align-items: center; gap: 10px; padding: 16px 22px; border-radius: 14px; font-size: 16px; font-weight: 600; color: var(--text);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"></path></svg>
+          Paste a YouTube link
+        </div>
+      </div>
+      <div class="faint" style="display: flex; align-items: center; gap: 28px; font-size: 14px; font-weight: 500;">
+        <div style="display: flex; align-items: center; gap: 8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>Speaker diarization</div>
+        <div style="display: flex; align-items: center; gap: 8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>Word-level timestamps</div>
+        <div style="display: flex; align-items: center; gap: 8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>Up to 1 hour per file</div>
+      </div>
+    </div>
+
+    <!-- 3D stage: orbit ring + sound cube + floating transcript stack -->
+    <div class="stage rise rise-2" style="position: relative; height: 640px;">
+      <div class="p3d" style="position: absolute; inset: 0;">
+
+        <!-- orbit ring of languages -->
+        <div class="orbit" style="position: absolute; left: 50%; top: 46%; width: 0; height: 0;">
+          <sc-for list="{{orbit}}" as="o" hint-placeholder-count="6">
+            <div style="position: absolute; left: 0; top: 0; transform: rotateZ({{o.deg}}deg) translateX(300px);">
+              <div class="chip3d surface" style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px; font-size: 12px; font-weight: 800; color: var(--text); white-space: nowrap; box-shadow: 0 8px 20px -10px rgba(0,0,0,0.35);">
+                <span style="width: 8px; height: 8px; border-radius: 999px; background: {{o.color}};"></span>{{o.label}}
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <!-- sound cube -->
+        <div class="p3d" style="position: absolute; left: 62px; top: 90px; width: 150px; height: 150px;">
+          <div class="cube" style="position: absolute; inset: 0;">
+            <div class="face" style="transform: translateZ(75px);"></div>
+            <div class="face" style="transform: rotateY(180deg) translateZ(75px);"></div>
+            <div class="face" style="transform: rotateY(90deg) translateZ(75px);"></div>
+            <div class="face" style="transform: rotateY(-90deg) translateZ(75px);"></div>
+            <div class="face" style="transform: rotateX(90deg) translateZ(75px); background-image: none;"></div>
+            <div class="face" style="transform: rotateX(-90deg) translateZ(75px); background-image: none;"></div>
+          </div>
+          <div style="position: absolute; left: -10px; right: -10px; bottom: -70px; height: 26px; border-radius: 999px; background: radial-gradient(closest-side, var(--glow), transparent); filter: blur(6px);"></div>
+        </div>
+
+        <!-- stacked subtitle cards (behind) -->
+        <div class="stack-3 surface" style="position: absolute; left: 250px; top: 120px; width: 470px; height: 330px; border-radius: 24px; opacity: 0.55;"></div>
+        <div class="stack-2 surface" style="position: absolute; left: 250px; top: 120px; width: 470px; height: 330px; border-radius: 24px; opacity: 0.8;"></div>
+
+        <!-- live transcription card (front) -->
+        <div class="float-card surface" style="position: absolute; left: 250px; top: 120px; width: 470px; border-radius: 24px; box-shadow: 0 40px 90px -40px rgba(15,15,30,0.45); overflow: hidden;">
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border);">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 8px; background: rgba(16,185,129,0.14); color: #059669; font-size: 12px; font-weight: 700; letter-spacing: 0.06em;">
+                <span class="live-dot" style="width: 7px; height: 7px; border-radius: 999px; background: #10B981;"></span>LIVE
+              </div>
+              <div class="muted" style="font-size: 13px; font-weight: 600;">lecture_04_photosynthesis.mp4</div>
+            </div>
+            <div class="faint" style="font-size: 13px; font-weight: 500;">{{clock}} / 06:32</div>
+          </div>
+          <div style="display: flex; align-items: flex-end; gap: 4px; height: 84px; padding: 16px 20px 10px;">
+            <sc-for list="{{bars}}" as="b" hint-placeholder-count="48">
+              <div class="bar" style="flex: 1; height: {{b.h}}px; border-radius: 3px; background: {{b.color}}; animation-delay: {{b.d}}s; animation-duration: {{b.dur}}s;"></div>
+            </sc-for>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 12px; padding: 6px 20px 18px; min-height: 230px;">
+            <sc-for list="{{lines}}" as="line" hint-placeholder-count="4">
+              <div style="display: flex; gap: 12px; align-items: flex-start; direction: {{line.dir}};">
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 60px;">
+                  <div style="padding: 4px 9px; border-radius: 7px; background: {{line.chipBg}}; color: {{line.chipFg}}; font-size: 11px; font-weight: 800; letter-spacing: 0.04em; white-space: nowrap;">{{line.spk}}</div>
+                  <div class="faint" style="font-size: 11px; font-variant-numeric: tabular-nums;">{{line.t}}</div>
+                </div>
+                <div class="{{line.cls}}" style="font-size: {{line.size}}px; line-height: {{line.lh}}; font-weight: 500; display: flex; flex-wrap: wrap; gap: 0 7px;">
+                  <sc-for list="{{line.words}}" as="w" hint-placeholder-count="8">
+                    <span style="color: {{w.color}}; transition: color 0.25s ease;">{{w.text}}</span>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display: flex; align-items: center; gap: 14px; padding: 12px 20px; border-top: 1px solid var(--border); background: var(--surface2);">
+            <div class="muted" style="font-size: 12px; font-weight: 700; letter-spacing: 0.04em;">TRANSCRIBING</div>
+            <div style="flex: 1; height: 6px; border-radius: 999px; background: var(--border); overflow: hidden;">
+              <div class="progress" style="height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--accent), var(--amber));"></div>
+            </div>
+            <div class="faint" style="font-size: 12px; font-variant-numeric: tabular-nums;">ETA ~22s</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- marquee -->
+  <div style="position: relative; margin: 32px 0 0; padding: 18px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); overflow: hidden; white-space: nowrap;">
+    <div class="marquee display faint" style="display: inline-flex; gap: 56px; font-size: 22px; font-weight: 700;">
+      <span>Transcribe</span><span style="color: var(--accent);">·</span><span>Diarize</span><span style="color: var(--accent);">·</span><span>Subtitle</span><span style="color: var(--accent);">·</span><span>Translate</span><span style="color: var(--accent);">·</span><span>Quiz</span><span style="color: var(--accent);">·</span><span>Notes</span><span style="color: var(--accent);">·</span><span>Meeting minutes</span><span style="color: var(--accent);">·</span><span>Live captions</span><span style="color: var(--accent);">·</span>
+      <span>Transcribe</span><span style="color: var(--accent);">·</span><span>Diarize</span><span style="color: var(--accent);">·</span><span>Subtitle</span><span style="color: var(--accent);">·</span><span>Translate</span><span style="color: var(--accent);">·</span><span>Quiz</span><span style="color: var(--accent);">·</span><span>Notes</span><span style="color: var(--accent);">·</span><span>Meeting minutes</span><span style="color: var(--accent);">·</span><span>Live captions</span><span style="color: var(--accent);">·</span>
+    </div>
+  </div>
+
+  <!-- how it works: isometric 3D tiles -->
+  <div style="position: relative; padding: 96px 72px 40px; display: flex; flex-direction: column; gap: 44px;">
+    <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 40px;">
+      <h2 class="display" style="margin: 0; font-size: 44px; font-weight: 800; color: var(--text); max-width: 640px;">Four steps. You stay in control at each one.</h2>
+      <p class="muted" style="margin: 0; max-width: 420px; font-size: 16px; line-height: 1.6;">Nothing is generated automatically. Every output has its own button, so you only pay for what you ask for.</p>
+    </div>
+    <div class="stage" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px;">
+      <div class="surface" style="display: flex; flex-direction: column; gap: 16px; padding: 28px; border-radius: 20px;">
+        <div class="stage" style="height: 120px; display: flex; align-items: center; justify-content: center;">
+          <div class="tile" style="position: relative; width: 84px; height: 84px;">
+            <div style="position: absolute; inset: 0; border-radius: 10px; background: var(--accent); transform: translateZ(18px); display: flex; align-items: center; justify-content: center;">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"></path></svg>
+            </div>
+            <div style="position: absolute; inset: 0; border-radius: 10px; background: color-mix(in srgb, var(--accent) 55%, black); transform: translateZ(0);"></div>
+          </div>
+        </div>
+        <div class="display" style="font-size: 13px; font-weight: 700; color: var(--accent); letter-spacing: 0.12em;">STEP 01</div>
+        <div style="font-size: 20px; font-weight: 700; color: var(--text);">Upload or link</div>
+        <div class="muted" style="font-size: 15px; line-height: 1.55;">Audio or video up to 2 GB, or a YouTube URL. Pick a language hint so Urdu never comes back as Hindi.</div>
+      </div>
+      <div class="surface" style="display: flex; flex-direction: column; gap: 16px; padding: 28px; border-radius: 20px;">
+        <div class="stage" style="height: 120px; display: flex; align-items: center; justify-content: center;">
+          <div class="tile t-2" style="position: relative; width: 84px; height: 84px;">
+            <div style="position: absolute; inset: 0; border-radius: 10px; background: var(--amber); transform: translateZ(18px); display: flex; align-items: center; justify-content: center;">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="m3 16 5-5 4 4 3-3 6 6"></path><circle cx="16" cy="9" r="1.5"></circle></svg>
+            </div>
+            <div style="position: absolute; inset: 0; border-radius: 10px; background: color-mix(in srgb, var(--amber) 55%, black); transform: translateZ(0);"></div>
+          </div>
+        </div>
+        <div class="display" style="font-size: 13px; font-weight: 700; color: var(--accent); letter-spacing: 0.12em;">STEP 02</div>
+        <div style="font-size: 20px; font-weight: 700; color: var(--text);">Add slides or notes</div>
+        <div class="muted" style="font-size: 15px; line-height: 1.55;">Optional. Photos of slides, whiteboards or handwritten notes are read and kept alongside the transcript.</div>
+      </div>
+      <div class="surface" style="display: flex; flex-direction: column; gap: 16px; padding: 28px; border-radius: 20px;">
+        <div class="stage" style="height: 120px; display: flex; align-items: center; justify-content: center;">
+          <div class="tile t-3" style="position: relative; width: 84px; height: 84px;">
+            <div style="position: absolute; inset: 0; border-radius: 10px; background: #10B981; transform: translateZ(18px); display: flex; align-items: center; justify-content: center;">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M7 15h6M15 15h2M7 11h2M11 11h6"></path></svg>
+            </div>
+            <div style="position: absolute; inset: 0; border-radius: 10px; background: #047857; transform: translateZ(0);"></div>
+          </div>
+        </div>
+        <div class="display" style="font-size: 13px; font-weight: 700; color: var(--accent); letter-spacing: 0.12em;">STEP 03</div>
+        <div style="font-size: 20px; font-weight: 700; color: var(--text);">Review the transcript</div>
+        <div class="muted" style="font-size: 15px; line-height: 1.55;">Speakers, timestamps, SRT and VTT with real timing. Full previews, one-click downloads.</div>
+      </div>
+      <div class="surface" style="display: flex; flex-direction: column; gap: 16px; padding: 28px; border-radius: 20px;">
+        <div class="stage" style="height: 120px; display: flex; align-items: center; justify-content: center;">
+          <div class="tile t-4" style="position: relative; width: 84px; height: 84px;">
+            <div style="position: absolute; inset: 0; border-radius: 10px; background: #EC4899; transform: translateZ(18px); display: flex; align-items: center; justify-content: center;">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"></path></svg>
+            </div>
+            <div style="position: absolute; inset: 0; border-radius: 10px; background: #9D174D; transform: translateZ(0);"></div>
+          </div>
+        </div>
+        <div class="display" style="font-size: 13px; font-weight: 700; color: var(--accent); letter-spacing: 0.12em;">STEP 04</div>
+        <div style="font-size: 20px; font-weight: 700; color: var(--text);">Generate what you need</div>
+        <div class="muted" style="font-size: 15px; line-height: 1.55;">Translation, MCQ quiz, point-wise notes or minutes of meeting, each from its own button.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- features (3D tilt on hover) -->
+  <div class="stage" style="position: relative; padding: 72px 72px 40px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px;">
+    <div class="surface card" style="display: flex; flex-direction: column; gap: 14px; padding: 28px; border-radius: 20px;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0Z"></path><path d="M4 21a8 8 0 0 1 16 0"></path><path d="M20 8a4 4 0 0 1 0 6"></path></svg>
+      <div style="font-size: 19px; font-weight: 700; color: var(--text);">Who said what</div>
+      <div class="muted" style="font-size: 15px; line-height: 1.55;">Speaker diarization labels each turn. Reliable for up to three speakers, useful for panels and interviews.</div>
+    </div>
+    <div class="surface card" style="display: flex; flex-direction: column; gap: 14px; padding: 28px; border-radius: 20px;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M7 15h6M15 15h2M7 11h2M11 11h6"></path></svg>
+      <div style="font-size: 19px; font-weight: 700; color: var(--text);">Subtitles that line up</div>
+      <div class="muted" style="font-size: 15px; line-height: 1.55;">Cues are built from word-level timestamps, not guesses. Export SRT or VTT for YouTube, VLC or Premiere.</div>
+    </div>
+    <div class="surface card" style="display: flex; flex-direction: column; gap: 14px; padding: 28px; border-radius: 20px;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h7M4 9h5M9 5c0 5-3 8-5 9M7 5c1 4 4 7 6 8"></path><path d="m13 19 3-7 3 7M14.5 16h3"></path></svg>
+      <div style="font-size: 19px; font-weight: 700; color: var(--text);">Urdu, Arabic, English and 80 more</div>
+      <div class="muted" style="font-size: 15px; line-height: 1.55;">Code-switching handled. Urdu comes out in Urdu script, never Roman Urdu or Hindi, and translations keep the timing.</div>
+    </div>
+    <div class="surface card" style="display: flex; flex-direction: column; gap: 14px; padding: 28px; border-radius: 20px;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h.01"></path></svg>
+      <div style="font-size: 19px; font-weight: 700; color: var(--text);">Quiz yourself</div>
+      <div class="muted" style="font-size: 15px; line-height: 1.55;">MCQs with hints and a reason for every option. Answer in the app, see your score, download the set.</div>
+    </div>
+    <div class="surface card" style="display: flex; flex-direction: column; gap: 14px; padding: 28px; border-radius: 20px;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"></path></svg>
+      <div style="font-size: 19px; font-weight: 700; color: var(--text);">Notes and minutes</div>
+      <div class="muted" style="font-size: 15px; line-height: 1.55;">Point-wise study notes for lectures. Agenda, decisions and action items with owners for meetings.</div>
+    </div>
+    <div class="surface card" style="display: flex; flex-direction: column; gap: 14px; padding: 28px; border-radius: 20px;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="m3 16 5-5 4 4 3-3 6 6"></path><circle cx="16" cy="9" r="1.5"></circle></svg>
+      <div style="font-size: 19px; font-weight: 700; color: var(--text);">Slides and whiteboards</div>
+      <div class="muted" style="font-size: 15px; line-height: 1.55;">Upload photos of the material. Text is read out, the images are described, and you can ask questions about them.</div>
+    </div>
+  </div>
+
+  <!-- multilingual showcase -->
+  <div class="surface" style="position: relative; margin: 72px 72px 0; display: grid; grid-template-columns: 1fr 1.1fr; gap: 48px; align-items: center; padding: 48px; border-radius: 28px;">
+    <div style="display: flex; flex-direction: column; gap: 18px;">
+      <div class="display" style="font-size: 13px; font-weight: 700; color: var(--amber); letter-spacing: 0.12em;">BUILT FOR PAKISTANI CLASSROOMS</div>
+      <h3 class="display" style="margin: 0; font-size: 36px; font-weight: 800; color: var(--text); line-height: 1.1;">Urdu and English in the same sentence. Handled.</h3>
+      <p class="muted" style="margin: 0; font-size: 16px; line-height: 1.6;">Lecturers switch languages mid-thought. The transcript keeps the mix, writes Urdu in Urdu script, and the English translation sits one click away.</p>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+      <div style="padding: 22px 24px; border-radius: 16px; background: var(--surface2); border: 1px solid var(--border);">
+        <div class="faint" style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 10px;">TRANSCRIPT · SPEAKER 1 · 01:12</div>
+        <div class="urdu" style="direction: rtl; text-align: right; font-size: 20px; line-height: 2.1; color: var(--text);">اس کورس کا مقصد یہ ہے کہ آپ ایک competent freelancer بنیں، اور ہم Fiverr اور Upwork پر focus کریں گے۔</div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px; padding: 0 8px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"></path></svg>
+        <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.1em; color: var(--accent);">TRANSLATED · TIMING PRESERVED</div>
+      </div>
+      <div style="padding: 22px 24px; border-radius: 16px; background: var(--surface2); border: 1px solid var(--border);">
+        <div class="faint" style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 10px;">ENGLISH · SPEAKER 1 · 01:12</div>
+        <div style="font-size: 17px; line-height: 1.6; color: var(--text);">The aim of this course is to make you a competent freelancer, and we will focus on Fiverr and Upwork.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA + footer -->
+  <div style="position: relative; padding: 96px 72px 48px; display: flex; flex-direction: column; align-items: center; gap: 22px; text-align: center;">
+    <h2 class="display" style="margin: 0; font-size: 46px; font-weight: 800; color: var(--text); max-width: 760px; line-height: 1.08;">Drop in a lecture. Leave with notes, subtitles and a quiz.</h2>
+    <div class="btn" style="display: flex; align-items: center; gap: 10px; padding: 18px 28px; border-radius: 14px; background: var(--accent); color: #FFFFFF; font-size: 17px; font-weight: 700; box-shadow: 0 16px 48px -14px var(--accent);">
+      Start transcribing
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </div>
+    <div class="faint" style="margin-top: 56px; display: flex; align-items: center; justify-content: space-between; width: 100%; padding-top: 28px; border-top: 1px solid var(--border); font-size: 13px;">
+      <div>TranscriptoGen AI · Final Year Project · Abubakar Khan &amp; Muhammad Abdullah · School of Software Engineering, Minhaj University Lahore</div>
+      <div style="display: flex; gap: 24px;"><span>Privacy</span><span>Terms</span><span>Contact</span></div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"accent":{"editor":"color","default":"#4F46E5","options":["#4F46E5","#6366F1","#0EA5E9","#E11D48"],"section":"Theme"},"demoLanguage":{"editor":"enum","options":["English","Urdu"],"default":"English","section":"Live demo"},"$preview":{"width":1440,"height":3040}}'>
+const DEMO = {
+  English: [
+    { spk: 1, t: "00:02", text: "Welcome to the lecture on photosynthesis. Plants convert light energy into chemical energy." },
+    { spk: 1, t: "00:09", text: "The light reactions happen in the thylakoid membranes of the chloroplast." },
+    { spk: 2, t: "00:15", text: "Sir, is the Calvin cycle also part of the light reactions?" },
+    { spk: 1, t: "00:19", text: "No. The Calvin cycle runs in the stroma and it does not need light directly." }
+  ],
+  Urdu: [
+    { spk: 1, t: "00:02", text: "اس lecture میں ہم photosynthesis کو سمجھیں گے۔ پودے light energy کو chemical energy میں بدلتے ہیں۔" },
+    { spk: 1, t: "00:09", text: "Light reactions chloroplast کی thylakoid membranes میں ہوتے ہیں۔" },
+    { spk: 2, t: "00:15", text: "سر، کیا Calvin cycle بھی light reactions کا حصہ ہے؟" },
+    { spk: 1, t: "00:19", text: "نہیں۔ Calvin cycle stroma میں چلتا ہے اور اسے براہ راست light نہیں چاہیے۔" }
+  ]
+};
+
+const LIGHT = {
+  bg: "#F7F7F4", surface: "#FFFFFF", surface2: "#F1F1EC", border: "rgba(20,20,26,0.10)",
+  text: "#15151C", muted: "#5F5F6E", faint: "#9A9AA8", amber: "#D97706",
+  faceBg: "rgba(255,255,255,0.55)", glow: "rgba(79,70,229,0.22)", glowAmber: "rgba(217,119,6,0.16)",
+  grid: "rgba(20,20,26,0.05)", switchTrack: "#D9D9E0", knobLeft: "3px",
+  wordOn: "#15151C", wordOff: "rgba(21,21,28,0.16)"
+};
+const DARK = {
+  bg: "#0B0B12", surface: "rgba(255,255,255,0.05)", surface2: "rgba(0,0,0,0.25)", border: "rgba(255,255,255,0.12)",
+  text: "#F4F4F5", muted: "#B4B4C2", faint: "#6B6B7C", amber: "#F59E0B",
+  faceBg: "rgba(11,11,18,0.55)", glow: "rgba(99,102,241,0.28)", glowAmber: "rgba(245,158,11,0.14)",
+  grid: "rgba(255,255,255,0.035)", switchTrack: "#4338CA", knobLeft: "25px",
+  wordOn: "#F4F4F5", wordOff: "rgba(244,244,245,0.14)"
+};
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { li: 0, wi: 0, dark: false };
+    this._bars = Array.from({ length: 48 }, (_, i) => ({
+      h: 12 + Math.round(Math.abs(Math.sin(i * 0.55)) * 40 + (i % 5) * 3),
+      d: -((i * 0.09) % 1.4).toFixed(2),
+      dur: (1.1 + ((i * 7) % 5) * 0.14).toFixed(2)
+    }));
+  }
+  componentDidMount() {
+    this._timer = setInterval(() => {
+      const lang = this.props.demoLanguage ?? "English";
+      const lines = DEMO[lang] || DEMO.English;
+      let { li, wi } = this.state;
+      const words = lines[li].text.split(" ");
+      if (wi < words.length) { wi += 1; }
+      else if (li < lines.length - 1) { li += 1; wi = 0; }
+      else { li = 0; wi = 0; }
+      this.setState({ li, wi });
+    }, 230);
+  }
+  componentWillUnmount() { clearInterval(this._timer); }
+  renderVals() {
+    const accent = this.props.accent ?? "#4F46E5";
+    const dark = this.state.dark;
+    const t = dark ? DARK : LIGHT;
+    const lang = this.props.demoLanguage ?? "English";
+    const src = DEMO[lang] || DEMO.English;
+    const isUrdu = lang === "Urdu";
+    const { li, wi } = this.state;
+    const lines = src.slice(0, li + 1).map((line, idx) => {
+      const words = line.text.split(" ").map((w, i) => {
+        let color = t.wordOn;
+        if (idx === li) { color = i < wi ? t.wordOn : (i === wi ? accent : t.wordOff); }
+        return { text: w, color };
+      });
+      const second = line.spk === 2;
+      return {
+        spk: "SPK " + line.spk, t: line.t, words,
+        chipBg: second ? (dark ? "rgba(245,158,11,0.16)" : "rgba(217,119,6,0.14)") : accent + "22",
+        chipFg: second ? t.amber : accent,
+        dir: isUrdu ? "rtl" : "ltr",
+        cls: isUrdu ? "urdu" : "",
+        size: isUrdu ? 17 : 15,
+        lh: isUrdu ? 2.0 : 1.55
+      };
+    });
+    const clock = src[li].t;
+    const bars = this._bars.map((b, i) => ({ ...b, color: i % 9 === 0 ? t.amber : accent }));
+    const langs = [["English", accent], ["اردو", t.amber], ["العربية", "#10B981"], ["हिन्दी", "#EC4899"], ["Español", "#0EA5E9"], ["Français", "#8B5CF6"]];
+    const orbit = langs.map(([label, color], i) => ({ label, color, deg: i * 60 }));
+    return {
+      accent, t, lines, bars, clock, orbit,
+      isDark: dark, isLight: !dark,
+      themeLabel: dark ? "Dark" : "Light",
+      toggleTheme: () => this.setState({ dark: !this.state.dark })
+    };
+  }
+}
+</script>
+</body>
+</html>

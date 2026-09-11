@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TranscriptoGen AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Manrope:wght@400;500;600;700&family=Noto+Nastaliq+Urdu:wght@400;600&display=swap">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<div class="glow glow-a"></div>
+<div class="glow glow-b"></div>
+<div class="gridbg"></div>
+
+<!-- ============ NAV ============ -->
+<header class="nav">
+  <a class="brand" href="#top">
+    <span class="brand-mark">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M4 12v2M8 8v8M12 5v14M16 9v6M20 11v3"/></svg>
+    </span>
+    <span class="display">TranscriptoGen <em>AI</em></span>
+  </a>
+  <nav class="nav-links">
+    <a href="#features">Features</a><a href="#how">How it works</a><a href="#languages">Languages</a><a href="#app">App</a>
+  </nav>
+  <div class="nav-actions">
+    <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle dark mode">
+      <span class="tt-label">Light</span>
+      <span class="tt-track"><span class="tt-knob">
+        <svg class="ic-sun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B45309" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg class="ic-moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E1B4B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+      </span></span>
+    </button>
+    <a class="btn btn-ink" href="#app">Open app</a>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="top">
+  <div class="hero-copy">
+    <div class="pill rise"><span class="live-dot"></span> Gemini 3.5 Transcribe · 85+ languages · Urdu &amp; English mix</div>
+    <h1 class="display rise rise-2">Every lecture, meeting and speech, turned into text you can <span class="accent">actually use.</span></h1>
+    <p class="lead rise rise-3">Upload a recording or paste a YouTube link. Get an accurate transcript with speakers, real-timed subtitles, translations, quizzes, notes and meeting minutes. Nothing runs until you press the button.</p>
+    <div class="hero-cta rise rise-4">
+      <a class="btn btn-accent" href="#app"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg>Upload a recording</a>
+      <a class="btn btn-ghost" href="#app" data-mode="url"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>Paste a YouTube link</a>
+    </div>
+    <ul class="checks faint">
+      <li>Speaker diarization</li><li>Word-level timestamps</li><li>Up to 1 hour per file</li>
+    </ul>
+  </div>
+
+  <div class="stage rise rise-2">
+    <div class="p3d stage-inner">
+      <div class="orbit" id="orbit"></div>
+      <div class="cube-wrap">
+        <div class="cube">
+          <div class="face f1"></div><div class="face f2"></div><div class="face f3"></div>
+          <div class="face f4"></div><div class="face f5 plain"></div><div class="face f6 plain"></div>
+        </div>
+        <div class="cube-shadow"></div>
+      </div>
+      <div class="stack stack-3"></div>
+      <div class="stack stack-2"></div>
+      <div class="float-card surface">
+        <div class="fc-head">
+          <div class="row gap12"><span class="badge-live"><span class="live-dot"></span>LIVE</span><span class="muted small">lecture_04_photosynthesis.mp4</span></div>
+          <span class="faint small" id="demoClock">00:02 / 06:32</span>
+        </div>
+        <div class="wave" id="demoWave"></div>
+        <div class="demo-lines" id="demoLines"></div>
+        <div class="fc-foot"><span class="muted tiny bold">TRANSCRIBING</span><span class="track"><span class="fill"></span></span><span class="faint tiny">ETA ~22s</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="marquee-wrap"><div class="marquee display faint">
+  <span>Transcribe</span><i>·</i><span>Diarize</span><i>·</i><span>Subtitle</span><i>·</i><span>Translate</span><i>·</i><span>Quiz</span><i>·</i><span>Notes</span><i>·</i><span>Meeting minutes</span><i>·</i><span>Live captions</span><i>·</i>
+  <span>Transcribe</span><i>·</i><span>Diarize</span><i>·</i><span>Subtitle</span><i>·</i><span>Translate</span><i>·</i><span>Quiz</span><i>·</i><span>Notes</span><i>·</i><span>Meeting minutes</span><i>·</i><span>Live captions</span><i>·</i>
+</div></div>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="section" id="how">
+  <div class="section-head">
+    <h2 class="display">Four steps. You stay in control at each one.</h2>
+    <p class="muted">Nothing is generated automatically. Every output has its own button, so you only pay for what you ask for.</p>
+  </div>
+  <div class="grid4 stage">
+    <div class="surface card-step"><div class="tile-wrap"><div class="tile t1"><div class="tile-top" style="--c:var(--accent);--cd:#3730A3"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg></div><div class="tile-base" style="--cd:#3730A3"></div></div></div><div class="step-no display">STEP 01</div><h3>Upload or link</h3><p class="muted">Audio or video up to 2 GB, or a YouTube URL. Pick a language hint so Urdu never comes back as Hindi.</p></div>
+    <div class="surface card-step"><div class="tile-wrap"><div class="tile t2"><div class="tile-top" style="--c:var(--amber);--cd:#92400E"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m3 16 5-5 4 4 3-3 6 6"/><circle cx="16" cy="9" r="1.5"/></svg></div><div class="tile-base" style="--cd:#92400E"></div></div></div><div class="step-no display">STEP 02</div><h3>Add slides or notes</h3><p class="muted">Optional. Photos of slides, whiteboards or handwritten notes are read and kept alongside the transcript.</p></div>
+    <div class="surface card-step"><div class="tile-wrap"><div class="tile t3"><div class="tile-top" style="--c:#10B981;--cd:#047857"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 15h6M15 15h2M7 11h2M11 11h6"/></svg></div><div class="tile-base" style="--cd:#047857"></div></div></div><div class="step-no display">STEP 03</div><h3>Review the transcript</h3><p class="muted">Speakers, timestamps, SRT and VTT with real timing. Full previews, one-click downloads.</p></div>
+    <div class="surface card-step"><div class="tile-wrap"><div class="tile t4"><div class="tile-top" style="--c:#EC4899;--cd:#9D174D"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></div><div class="tile-base" style="--cd:#9D174D"></div></div></div><div class="step-no display">STEP 04</div><h3>Generate what you need</h3><p class="muted">Translation, MCQ quiz, point-wise notes or minutes of meeting, each from its own button.</p></div>
+  </div>
+</section>
+
+<!-- ============ FEATURES ============ -->
+<section class="section grid3 stage" id="features">
+  <div class="surface card feat"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0Z"/><path d="M4 21a8 8 0 0 1 16 0"/><path d="M20 8a4 4 0 0 1 0 6"/></svg><h3>Who said what</h3><p class="muted">Speaker diarization labels each turn. Reliable for up to three speakers, useful for panels and interviews.</p></div>
+  <div class="surface card feat"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 15h6M15 15h2M7 11h2M11 11h6"/></svg><h3>Subtitles that line up</h3><p class="muted">Cues are built from word-level timestamps, not guesses. Export SRT or VTT for YouTube, VLC or Premiere.</p></div>
+  <div class="surface card feat"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h7M4 9h5M9 5c0 5-3 8-5 9M7 5c1 4 4 7 6 8"/><path d="m13 19 3-7 3 7M14.5 16h3"/></svg><h3>Urdu, Arabic, English and 80 more</h3><p class="muted">Code-switching handled. Urdu comes out in Urdu script, never Roman Urdu or Hindi, and translations keep the timing.</p></div>
+  <div class="surface card feat"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h.01"/></svg><h3>Quiz yourself</h3><p class="muted">MCQs with hints and a reason for every option. Answer in the app, see your score, download the set.</p></div>
+  <div class="surface card feat"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><h3>Notes and minutes</h3><p class="muted">Point-wise study notes for lectures. Agenda, decisions and action items with owners for meetings.</p></div>
+  <div class="surface card feat"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m3 16 5-5 4 4 3-3 6 6"/><circle cx="16" cy="9" r="1.5"/></svg><h3>Slides and whiteboards</h3><p class="muted">Upload photos of the material. Text is read out, the images are described, and you can ask questions about them.</p></div>
+</section>
+
+<!-- ============ LANGUAGES ============ -->
+<section class="section" id="languages">
+  <div class="surface showcase">
+    <div>
+      <div class="eyebrow display amber">BUILT FOR PAKISTANI CLASSROOMS</div>
+      <h3 class="display h3big">Urdu and English in the same sentence. Handled.</h3>
+      <p class="muted">Lecturers switch languages mid-thought. The transcript keeps the mix, writes Urdu in Urdu script, and the English translation sits one click away.</p>
+    </div>
+    <div class="col gap14">
+      <div class="quote"><div class="faint tiny bold">TRANSCRIPT · SPEAKER 1 · 01:12</div><div class="urdu rtl">اس کورس کا مقصد یہ ہے کہ آپ ایک competent freelancer بنیں، اور ہم Fiverr اور Upwork پر focus کریں گے۔</div></div>
+      <div class="row gap10 accent tiny bold"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>TRANSLATED · TIMING PRESERVED</div>
+      <div class="quote"><div class="faint tiny bold">ENGLISH · SPEAKER 1 · 01:12</div><div>The aim of this course is to make you a competent freelancer, and we will focus on Fiverr and Upwork.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ APP ============ -->
+<section class="section app" id="app">
+  <div class="section-head">
+    <h2 class="display">The app</h2>
+    <p class="muted" id="healthLine">Checking server…</p>
+  </div>
+
+  <!-- Step 1 -->
+  <div class="surface panel">
+    <div class="panel-title"><span class="stepbadge">1</span><h3>Generate transcript</h3></div>
+    <div class="two-col">
+      <div>
+        <div class="tabs" id="srcTabs"><button class="tab active" data-tab="file" type="button">Upload file</button><button class="tab" data-tab="url" type="button">YouTube / URL</button></div>
+        <div class="tabpane" data-pane="file">
+          <label class="drop" id="drop">
+            <input type="file" id="fileInput" accept=".mp3,.wav,.m4a,.aac,.ogg,.flac,.opus,.webm,.aiff,.mp4,.mov,.avi,.mkv,.flv,.wmv,.m4v" hidden>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg>
+            <div><strong>Drop audio or video here</strong> or click to choose (up to 2 GB)</div>
+            <div class="faint small" id="fileName">No file selected</div>
+          </label>
+        </div>
+        <div class="tabpane hidden" data-pane="url">
+          <input class="input" id="urlInput" type="url" placeholder="https://www.youtube.com/watch?v=…">
+        </div>
+      </div>
+      <div class="settings">
+        <label>Language hint<select class="input" id="langSel"></select></label>
+        <label>Mode<select class="input" id="modeSel"><option value="verbatim">Verbatim (speakers + timestamps)</option><option value="smart">Smart (clean dictation)</option></select></label>
+        <div class="row gap16 wrap">
+          <label class="check"><input type="checkbox" id="diarChk" checked> Speaker diarization</label>
+          <label class="check"><input type="checkbox" id="tsChk" checked> Word timestamps</label>
+          <label class="check"><input type="checkbox" id="fixChk" checked> Hindi → Urdu script</label>
+        </div>
+        <label>Custom vocabulary <span class="faint small">(only without diarization/timestamps)</span><input class="input" id="vocabInput" placeholder="Minhaj University, FastAPI"></label>
+      </div>
+    </div>
+    <button class="btn btn-accent wide" id="goBtn" type="button">Generate transcript</button>
+    <div class="progress hidden" id="progress">
+      <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+      <div class="row between small"><span id="progMsg" class="muted">Starting…</span><span id="progTime" class="faint"></span></div>
+    </div>
+    <div class="error hidden" id="err1"></div>
+  </div>
+
+  <!-- Step 2 images -->
+  <div class="surface panel">
+    <div class="panel-title"><span class="stepbadge alt">2</span><h3>Images <span class="faint">(optional)</span> · slides, whiteboard, notes</h3></div>
+    <div class="row gap12 wrap">
+      <label class="btn btn-ghost"><input type="file" id="imgInput" accept="image/*" multiple hidden>Choose images (max 10)</label>
+      <select class="input auto" id="imgLang"><option>English</option><option>Urdu</option><option>Arabic</option></select>
+      <button class="btn btn-accent" id="imgGo" type="button" disabled>Extract text &amp; describe</button>
+    </div>
+    <div class="thumbs" id="thumbs"></div>
+    <div class="hidden" id="imgResult">
+      <div class="row between wrap gap12"><strong id="imgTitle"></strong><a class="btn btn-ghost small-btn" id="imgDl" download="images.md">Download .md</a></div>
+      <div class="two-col">
+        <div><div class="tiny bold faint">DESCRIPTION</div><p id="imgDesc"></p><div class="tiny bold faint">KEY POINTS</div><ul id="imgPoints"></ul></div>
+        <div><div class="tiny bold faint">EXTRACTED TEXT</div><textarea class="input area" id="imgText" readonly></textarea></div>
+      </div>
+      <label class="check"><input type="checkbox" id="useImages" checked> Use the extracted text together with the transcript in step 4</label>
+      <div class="row gap10"><input class="input" id="imgQ" placeholder="Ask something about the images…"><button class="btn btn-ghost" id="imgAsk" type="button">Ask</button></div>
+      <div class="answer hidden" id="imgAnswer"></div>
+    </div>
+    <div class="error hidden" id="err2"></div>
+  </div>
+
+  <!-- Step 3 transcript -->
+  <div class="surface panel hidden" id="step3">
+    <div class="panel-title"><span class="stepbadge ok">3</span><h3>Transcript</h3><span class="muted small" id="tStats"></span></div>
+    <div class="tabs" id="tTabs"><button class="tab active" data-tab="text" type="button">Transcript</button><button class="tab" data-tab="speakers" type="button">Speakers</button><button class="tab" data-tab="srt" type="button">SRT</button><button class="tab" data-tab="vtt" type="button">VTT</button></div>
+    <div class="row gap10 wrap" id="dlRow"></div>
+    <textarea class="input area big" id="tView" readonly></textarea>
+  </div>
+
+  <!-- Step 4 generate -->
+  <div class="surface panel hidden" id="step4">
+    <div class="panel-title"><span class="stepbadge pink">4</span><h3>Generate more</h3><span class="muted small" id="srcLine"></span></div>
+    <div class="tabs" id="gTabs"><button class="tab active" data-tab="translate" type="button">Translation</button><button class="tab" data-tab="quiz" type="button">Quiz (MCQs)</button><button class="tab" data-tab="notes" type="button">Notes</button><button class="tab" data-tab="minutes" type="button">Meeting minutes</button></div>
+
+    <div class="tabpane" data-gpane="translate">
+      <div class="row gap10 wrap"><select class="input auto" id="trTarget"></select><button class="btn btn-accent" id="trGo" type="button">Translate</button><span class="row gap8" id="trDl"></span></div>
+      <textarea class="input area big hidden" id="trView" readonly></textarea>
+    </div>
+    <div class="tabpane hidden" data-gpane="quiz">
+      <div class="row gap10 wrap"><label class="row gap8">Questions <input class="input tiny-in" id="qN" type="number" min="3" max="20" value="5"></label><select class="input auto" id="qDiff"><option>easy</option><option selected>medium</option><option>hard</option></select><select class="input auto" id="qLang"><option>English</option><option>Urdu</option><option>Arabic</option></select><button class="btn btn-accent" id="qGo" type="button">Generate quiz</button><a class="btn btn-ghost hidden" id="qDl" download="quiz.md">Download .md</a></div>
+      <div id="quizBox"></div>
+    </div>
+    <div class="tabpane hidden" data-gpane="notes">
+      <div class="row gap10 wrap"><select class="input auto" id="nKind"><option value="points">Point-wise notes (detailed bullets)</option><option value="notes">Summary notes (short)</option></select><select class="input auto" id="nLang"><option>English</option><option>Urdu</option><option>Arabic</option></select><button class="btn btn-accent" id="nGo" type="button">Generate notes</button><a class="btn btn-ghost hidden" id="nDl" download="notes.md">Download .md</a></div>
+      <div class="md" id="notesBox"></div>
+    </div>
+    <div class="tabpane hidden" data-gpane="minutes">
+      <div class="row gap10 wrap"><select class="input auto" id="mLang"><option>English</option><option>Urdu</option><option>Arabic</option></select><button class="btn btn-accent" id="mGo" type="button">Generate minutes</button><a class="btn btn-ghost hidden" id="mDl" download="minutes.md">Download .md</a></div>
+      <div class="md" id="minutesBox"></div>
+    </div>
+    <div class="error hidden" id="err4"></div>
+  </div>
+</section>
+
+<footer class="footer faint small">
+  <div>TranscriptoGen AI · Final Year Project · Abubakar Khan &amp; Muhammad Abdullah · School of Software Engineering, Minhaj University Lahore</div>
+  <div class="row gap24"><a href="/docs">API docs</a><span>Privacy</span><span>Terms</span></div>
+</footer>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
