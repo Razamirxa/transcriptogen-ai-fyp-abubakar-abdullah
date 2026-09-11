@@ -157,8 +157,10 @@ a { color: var(--accent); text-decoration: none; } a:hover { color: var(--accent
 .footer { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; padding: 40px clamp(20px, 5vw, 72px); border-top: 1px solid var(--border); margin-top: 40px; }
 
 /* ---- hero illustration (layered SVG with mouse parallax) ---- */
-.hero-art { position: absolute; left: -46px; top: 40px; width: 360px; height: 430px; perspective: 900px; transform-style: preserve-3d; }
+.hero-art { position: absolute; left: -60px; top: 20px; width: 400px; height: 470px; perspective: 900px; transform-style: preserve-3d; }
 .mic3d { position: absolute; inset: 0; transform-style: preserve-3d; animation: turn 9s ease-in-out infinite alternate; }
+.mic3d.webgl { animation: none; transform: none; z-index: 2; }
+.mic3d.webgl canvas { display: block; width: 100%; height: 100%; }
 @keyframes turn { from { transform: rotateY(-30deg) rotateX(5deg); } to { transform: rotateY(30deg) rotateX(5deg); } }
 .stage.parallax .mic3d { animation-play-state: running; }
 /* orbit ring of language chips around the mic */
