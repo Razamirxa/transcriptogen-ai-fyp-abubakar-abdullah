@@ -144,6 +144,27 @@ def test_markdown_converters():
     assert "## Summary\nS\n\n## Key points\n- k1" in notes_to_markdown(n)
 
 
+def test_image_helpers():
+    from transcriptogen.generators import ImageExtraction, image_extraction_to_markdown
+
+    parts = ContentGenerator._image_parts([(b"\x89PNG", "image/png"), (b"\xff\xd8", "")])
+    assert len(parts) == 2
+    assert parts[0].inline_data.mime_type == "image/png"
+    assert parts[1].inline_data.mime_type == "image/jpeg"      # default when the browser gives no type
+
+    x = ImageExtraction(title="Slide 3", content_type="lecture slides", extracted_text="Image 1: Photosynthesis",
+                        description="A slide.", key_points=["Light -> energy"], detected_language="English")
+    md = image_extraction_to_markdown(x)
+    assert md.startswith("# Slide 3\n\n**Type:** lecture slides")
+    assert "## Extracted text\nImage 1: Photosynthesis" in md
+
+
+def test_analyse_images_rejects_empty(monkeypatch):
+    g = _gen([], monkeypatch)
+    with pytest.raises(ValueError):
+        g.analyse_images([])
+
+
 def test_fix_urdu_script_skips_clean_text(monkeypatch):
     g = _gen([], monkeypatch)
     urdu = "Speaker 1: یہ بہت اہم موضوع ہے اور we need to discuss this."

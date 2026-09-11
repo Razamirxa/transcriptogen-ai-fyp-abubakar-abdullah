@@ -22,6 +22,7 @@ Koi bhi **video ya audio file** (ya YouTube link) do, ye app usse banata hai:
 | **Quiz (MCQs)**           | Lecture se sawal, 4 options, hint, aur har option ki wajah                                                     |
 | **Notes** | Point-wise detailed notes (headings + bullets) ya short summary notes |
 | **Meeting minutes** | Meeting / speech ki recording se MoM: agenda, decisions, action items (owner, deadline), next steps |
+| **Images** | Slides / whiteboard / notes ki photos se text (OCR) + description + sawal-jawab; ye text notes/quiz/minutes mein bhi use hota hai |
 | **Live captions**         | Real-time transcription demo (`live_demo.py`)                                                                |
 | **Lambi videos**          | 1 ghante+ ki video bhi chalti hai, code khud chunks banata hai                                                 |
 
@@ -88,7 +89,7 @@ GEMINI_API_KEY_2=AIza...doosre_project_ki_key   # optional fallback
 
 ## 4. App kaise use karein (UI ka flow)
 
-App teen steps mein chalti hai, **kuch bhi automatic nahi hota**, har cheez button par:
+App chaar steps mein chalti hai (Step 2 optional), **kuch bhi automatic nahi hota**, har cheez button par:
 
 ### Step 1 – Generate transcript
 
@@ -103,7 +104,18 @@ App teen steps mein chalti hai, **kuch bhi automatic nahi hota**, har cheez butt
    - **Advanced → Convert Hindi to Urdu script**: on rakho (section 8 dekho).
 3. **🎯 Generate transcript** dabao. Neeche dikhega: media length, **estimated time**, elapsed / remaining timer, progress bar.
 
-### Step 2 – Transcript
+### Step 2 – Images (optional): slides, whiteboard, handwritten notes, documents
+
+Supervisor ki suggestion par: user tasveerein bhi upload kar sakta hai (10 tak: png/jpg/webp).
+
+1. Images upload karo (thumbnails dikhenge), output language chuno.
+2. **🔍 Extract text & describe** → model text parh kar (OCR, Urdu script bhi) nikalta hai, images ko describe karta hai, key points deta hai. Download `.md`.
+3. **💬 Ask** → image ke baare mein koi bhi sawal ("slide 2 ka diagram kya dikhata hai?"). Agar transcript bhi ho to woh context ke taur par saath jata hai.
+4. Checkbox **"Use the extracted text together with the transcript in step 4"** on ho to notes / quiz / minutes / translation transcript + image text dono par bante hain. Sirf images (bina audio) par bhi Step 4 chalta hai.
+
+Yeh feature bhi sirf button par chalta hai, automatic nahi.
+
+### Step 3 – Transcript
 
 Chaar tabs, har ek mein **pehle download button, phir poora preview** (koi truncation nahi, copy kar sakte ho):
 
@@ -114,7 +126,7 @@ Chaar tabs, har ek mein **pehle download button, phir poora preview** (koi trunc
 
 Upar caption mein check karo: characters, cues, **last cue kahan khatam hui vs media length**. Dono qareeb hon to transcript poora hai.
 
-### Step 3 – Generate more from this transcript
+### Step 4 – Generate more (transcript aur/ya image text se)
 
 - **Translation**: target language chuno → **🌐 Translate** → text + translated `.srt`/`.vtt`. Ek se zyada languages generate kar ke unke beech switch kar sakte ho.
 - **Quiz**: questions count, difficulty, language → **❓ Generate quiz** → sawal hal karo → **Check answers** → score aur har sawal ki explanation. Download `.md`.
@@ -183,7 +195,7 @@ transcriptogen-ai/
 ├── requirements.txt          # wahi dependencies pip format mein
 ├── packages.txt              # system package list (ffmpeg)
 ├── .streamlit/config.toml    # upload limit 2 GB, theme
-├── samples/sample_lecture.wav# 25 sec test audio
+├── samples/                   # sample_lecture.wav (25 s audio), sample_slide.png (test slide)
 ├── outputs/                  # CLI outputs (git par nahi)
 ├── tests/                    # pytest (offline)
 └── transcriptogen/           # asal code (package)
@@ -276,7 +288,8 @@ Neeche har file ke functions/classes hain, is order mein jis order mein file mei
 | `StudyNotes` | `summary`, `key_points`, `keywords`, `chapters` |
 | `NoteSection`, `PointNotes` | Point-wise notes: `title`, `sections[{heading, points[]}]`, `key_takeaways` |
 | `ActionItem`, `MeetingMinutes` | Minutes of meeting: `participants`, `agenda`, `discussion_summary`, `key_points`, `decisions`, `action_items[{task, owner, deadline}]`, `open_questions`, `next_steps` |
-| `TRANSLATE_PROMPT`, `TRANSLATE_CUES_PROMPT`, `QUIZ_PROMPT`, `URDU_SCRIPT_FIX_PROMPT`, `NOTES_PROMPT`, `POINT_NOTES_PROMPT`, `MINUTES_PROMPT` | Saare prompts (chuni hui language mein output, technical terms English, Urdu script, Roman Urdu nahi) |
+| `ImageExtraction` | Images ka result: `title`, `content_type`, `extracted_text` (OCR), `description`, `key_points`, `detected_language` |
+| `TRANSLATE_PROMPT`, `TRANSLATE_CUES_PROMPT`, `QUIZ_PROMPT`, `URDU_SCRIPT_FIX_PROMPT`, `NOTES_PROMPT`, `POINT_NOTES_PROMPT`, `MINUTES_PROMPT`, `IMAGE_EXTRACT_PROMPT`, `IMAGE_QA_PROMPT` | Saare prompts (chuni hui language mein output, technical terms English, Urdu script, Roman Urdu nahi) |
 | `MAX_CHARS`                                                                                                  | Transcript ka max hissa jo prompt mein jata hai (120k chars)                                                      |
 | `retry_delay_seconds(e)`                                                                                     | Error se "retry in 1.2s" parse                                                                                    |
 | `classify_error(e)`                                                                                          | `transient` / `quota` / `billing` / `model_gone` / `fatal`                                              |
@@ -298,7 +311,10 @@ Neeche har file ke functions/classes hain, is order mein jis order mein file mei
 | ↳ `notes(text, language)` | Summary notes |
 | ↳ `point_notes(text, language)` | Detailed point-wise notes (headings + bullets) |
 | ↳ `meeting_minutes(text, language)` | Minutes of meeting (agenda, decisions, action items ...) |
-| `quiz_to_markdown(q)`, `notes_to_markdown(n)`, `point_notes_to_markdown(p)`, `minutes_to_markdown(m, date)` | Har output ka `.md` file text |
+| ↳ `_image_parts(images)` | `(bytes, mime)` list → Gemini image parts |
+| ↳ `analyse_images(images, language)` | OCR + description + key points (JSON schema) |
+| ↳ `ask_images(images, question, language, context)` | Image ke baare mein sawal, transcript context optional |
+| `quiz_to_markdown(q)`, `notes_to_markdown(n)`, `point_notes_to_markdown(p)`, `minutes_to_markdown(m, date)`, `image_extraction_to_markdown(x)` | Har output ka `.md` file text |
 
 #### `transcriptogen/youtube.py`
 

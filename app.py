@@ -1,9 +1,11 @@
 """TranscriptoGen AI - Streamlit UI.
 
 Flow: 1) upload / URL + settings -> Generate transcript
-      2) transcript, speakers, subtitles (full previews + downloads)
-      3) optional extras, each only when its own button is pressed:
-         translation, quiz (MCQs), study notes.
+      2) optional: upload images (slides, whiteboard, notes) -> extract text / ask questions
+      3) transcript, speakers, subtitles (full previews + downloads)
+      4) optional extras, each only when its own button is pressed:
+         translation, quiz (MCQs), notes, meeting minutes
+         (source = transcript, and/or the text extracted from images)
 
 Run:  uv run streamlit run app.py
 """
@@ -22,6 +24,7 @@ from transcriptogen.config import LANGUAGE_OPTIONS, TRANSLATION_TARGETS, Transcr
 from transcriptogen.generators import (
     ContentGenerator,
     has_devanagari,
+    image_extraction_to_markdown,
     minutes_to_markdown,
     notes_to_markdown,
     point_notes_to_markdown,
@@ -45,23 +48,19 @@ st.markdown(
     """
 <style>
 [data-testid="stSidebar"], [data-testid="collapsedControl"] { display: none; }
-/* full-text previews are native text areas: theme-safe, scrollable, copyable */
 .preview textarea { font-size: 0.95rem !important; line-height: 1.7 !important; }
-.preview.rtl textarea { direction: rtl; text-align: right; font-size: 1.15rem !important; line-height: 2.1 !important;
-       font-family: 'Noto Nastaliq Urdu','Jameel Noori Nastaleeq','Noto Naskh Arabic', serif !important; }
 </style>
 """,
     unsafe_allow_html=True,
 )
 
+IMAGE_TYPES = ["png", "jpg", "jpeg", "webp", "gif", "bmp"]
+OUTPUT_LANGS = ["English", "Urdu", "Arabic"]
+
 
 # ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------
-def _escape(s: str) -> str:
-    return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-
-
 def _is_rtl(text: str) -> bool:
     sample = text[:600]
     return sum("؀" <= ch <= "ۿ" for ch in sample) > len(sample) * 0.2
@@ -70,9 +69,8 @@ def _is_rtl(text: str) -> bool:
 def show_full_text(text: str, key: str, height: int = 560) -> None:
     """Full, scrollable, copyable preview (no truncation); RTL styling for Urdu/Arabic.
 
-    A native text area is used on purpose: it is theme-safe (no custom colours),
-    never truncated and copy friendly. st.container(key=...) exposes the CSS
-    class st-key-<key>, which lets us style only this text area.
+    A native text area is used on purpose: theme-safe, never truncated, copy friendly.
+    st.container(key=...) exposes the CSS class st-key-<key> so only this area is styled.
     """
     with st.container(key=f"wrap_{key}"):
         if _is_rtl(text):
@@ -86,7 +84,6 @@ def show_full_text(text: str, key: str, height: int = 560) -> None:
 
 
 def show_code_full(text: str, key: str) -> None:
-    """Full preview of SRT/VTT/JSON in a scrollable text area (copy friendly)."""
     st.text_area("preview", value=text, height=520, key=key, label_visibility="collapsed")
 
 
@@ -102,12 +99,34 @@ def safe_name(stem: str) -> str:
     return "".join(ch if ch.isalnum() or ch in "-_ " else "_" for ch in stem).strip() or "transcript"
 
 
-def reset_outputs() -> None:
-    for k in ("result", "fixed_cues", "stem", "translations", "quiz", "notes", "point_notes", "minutes"):
+def reset_generated() -> None:
+    """Drop everything derived from the previous source (new transcript or new images)."""
+    for k in ("translations", "quiz", "notes", "point_notes", "minutes"):
         st.session_state.pop(k, None)
 
 
-# API key(s) come from .env locally, or from st.secrets on Streamlit Community Cloud.
+def reset_transcript() -> None:
+    for k in ("result", "fixed_cues", "stem"):
+        st.session_state.pop(k, None)
+    reset_generated()
+
+
+def source_text() -> str:
+    """Text that Step 4 works on: transcript and/or text extracted from images."""
+    parts: list[str] = []
+    result = st.session_state.get("result")
+    if result is not None:
+        parts.append(result.text)
+    img = st.session_state.get("images")
+    if img is not None and st.session_state.get("use_images", True):
+        parts.append(
+            f"[Content of {st.session_state.get('image_count', 0)} uploaded image(s): {img.content_type}]\n"
+            f"Description: {img.description}\n\nExtracted text:\n{img.extracted_text}"
+        )
+    return "\n\n".join(parts)
+
+
+# API key(s): .env locally, st.secrets on Streamlit Community Cloud
 try:
     for _name in ("GEMINI_API_KEY", "GEMINI_API_KEYS", *[f"GEMINI_API_KEY_{i}" for i in range(2, 10)]):
         if _name in st.secrets and st.secrets[_name]:
@@ -124,7 +143,7 @@ except RuntimeError as e:
 # Header
 # ---------------------------------------------------------------------------
 st.title("🎧 TranscriptoGen AI")
-st.caption("Video / audio → transcript · speakers · subtitles · translation · quiz · notes  |  "
+st.caption("Video / audio → transcript · speakers · subtitles · translation · quiz · notes · meeting minutes  |  "
            f"models: `{config.TRANSCRIBE_MODEL}` + `{config.TEXT_MODEL}`  |  "
            "FYP by Abubakar Khan & Muhammad Abdullah, School of Software Engineering, MUL")
 
@@ -179,7 +198,7 @@ if run:
     if uploaded is None and not (url and is_url(url)):
         st.error("Upload a file or paste a valid URL first.")
         st.stop()
-    reset_outputs()
+    reset_transcript()
     prog = st.progress(0.0)
     status = st.empty()
     timer = st.empty()
@@ -199,7 +218,7 @@ if run:
             stem = info.get("title") or "youtube"
             st.caption(f"Downloaded: **{stem}** ({(info.get('duration') or 0) / 60:.1f} min)")
 
-        # Run the transcription in a worker thread so the UI can tick elapsed / remaining time.
+        # Worker thread so the UI can tick elapsed / remaining time.
         state = {"msg": "Starting...", "frac": 0.0, "result": None, "error": None, "est": None}
         transcriber = GeminiTranscriber(api_keys=API_KEYS)
 
@@ -210,7 +229,7 @@ if run:
         def work() -> None:
             try:
                 state["result"] = transcriber.transcribe(tmp_path, opts, progress)
-            except Exception as e:  # surfaced in the main thread
+            except Exception as e:
                 state["error"] = e
 
         th = threading.Thread(target=work, daemon=True)
@@ -260,52 +279,128 @@ if run:
     )
 
 # ---------------------------------------------------------------------------
-# Step 2 - transcript outputs
+# Step 2 - images (optional): slides, whiteboard, handwritten notes, documents
 # ---------------------------------------------------------------------------
-if "result" not in st.session_state:
-    st.info("Upload a file or paste a URL, adjust settings if needed, then press **Generate transcript**.")
+st.header("2️⃣ Images (optional): slides · whiteboard · notes · documents")
+st.caption("Upload photos of the lecture slides, whiteboard or handwritten notes. The app reads the text (OCR), "
+           "describes the images and can answer questions about them. The extracted text can be used together with the "
+           "transcript in step 4.")
+
+img_files = st.file_uploader("Images (up to 10)", type=IMAGE_TYPES, accept_multiple_files=True, key="img_upload")
+img_files = (img_files or [])[:10]
+if img_files:
+    cols = st.columns(min(len(img_files), 5))
+    for i, f in enumerate(img_files):
+        cols[i % len(cols)].image(f, caption=f.name, use_container_width=True)
+
+ic1, ic2, ic3 = st.columns([2, 1, 1])
+img_lang = ic1.selectbox("Output language (description / answers)", OUTPUT_LANGS, index=0, key="img_lang")
+ic2.write("")
+ic2.write("")
+do_extract = ic2.button("🔍 Extract text & describe", type="primary", use_container_width=True, disabled=not img_files)
+ic3.write("")
+ic3.write("")
+if ic3.button("🗑️ Clear image results", use_container_width=True, disabled="images" not in st.session_state):
+    for k in ("images", "image_count", "image_answer"):
+        st.session_state.pop(k, None)
+    reset_generated()
+
+if do_extract:
+    with st.spinner(f"Reading {len(img_files)} image(s)..."):
+        try:
+            payload = [(f.getvalue(), f.type or "image/jpeg") for f in img_files]
+            st.session_state["images"] = ContentGenerator(api_keys=API_KEYS).analyse_images(payload, language=img_lang)
+            st.session_state["image_count"] = len(img_files)
+            st.session_state.pop("image_answer", None)
+            reset_generated()
+        except Exception as e:
+            st.error(f"Image analysis failed: {e}")
+
+img = st.session_state.get("images")
+if img is not None:
+    st.success(f"{img.title} · {img.content_type} · language: {img.detected_language}")
+    a, b = st.columns([1, 1])
+    with a:
+        st.markdown("**Description**")
+        st.write(img.description)
+        st.markdown("**Key points**")
+        for k in img.key_points:
+            st.markdown(f"- {k}")
+    with b:
+        st.markdown("**Extracted text**")
+        show_full_text(img.extracted_text, "img_text", height=300)
+    st.download_button("⬇️ Image analysis .md", image_extraction_to_markdown(img), "images.md", key="dl_img")
+    st.checkbox("Use the extracted text together with the transcript in step 4 (notes / quiz / minutes / translation)",
+                value=True, key="use_images")
+
+    st.markdown("**Ask something about the images**")
+    qa1, qa2 = st.columns([4, 1])
+    question = qa1.text_input("Question", placeholder="e.g. What does the diagram on slide 2 show? / Is formula ka matlab?",
+                              key="img_question", label_visibility="collapsed")
+    qa2.write("")
+    if qa2.button("💬 Ask", use_container_width=True, disabled=not question.strip()):
+        with st.spinner("Looking at the images..."):
+            try:
+                payload = [(f.getvalue(), f.type or "image/jpeg") for f in img_files]
+                if not payload:
+                    st.warning("Upload the images again to ask questions (files are not kept after a reload).")
+                else:
+                    ctx = st.session_state["result"].text if "result" in st.session_state else ""
+                    st.session_state["image_answer"] = ContentGenerator(api_keys=API_KEYS).ask_images(
+                        payload, question, language=img_lang, context=ctx)
+            except Exception as e:
+                st.error(f"Question failed: {e}")
+    if st.session_state.get("image_answer"):
+        st.info(st.session_state["image_answer"])
+
+# ---------------------------------------------------------------------------
+# Step 3 - transcript outputs
+# ---------------------------------------------------------------------------
+result = st.session_state.get("result")
+if result is None and img is None:
+    st.info("Generate a transcript (step 1) and/or analyse images (step 2) to continue.")
     st.stop()
 
-result = st.session_state["result"]
-stem = safe_name(st.session_state["stem"])
-cues = build_cues(result, st.session_state.get("fixed_cues"))
-srt, vtt = to_srt(cues), to_vtt(cues)
+stem = safe_name(st.session_state.get("stem", "images"))
+cues = None
+if result is not None:
+    cues = build_cues(result, st.session_state.get("fixed_cues"))
+    srt, vtt = to_srt(cues), to_vtt(cues)
 
-st.header("2️⃣ Transcript")
-st.caption(
-    f"{len(result.text):,} characters · {len(cues)} subtitle cues · last cue ends at "
-    f"{fmt_time(cues[-1].end, ms=False) if cues else '-'} · media length {fmt_time(result.duration or 0, ms=False)}"
-)
+    st.header("3️⃣ Transcript")
+    st.caption(
+        f"{len(result.text):,} characters · {len(cues)} subtitle cues · last cue ends at "
+        f"{fmt_time(cues[-1].end, ms=False) if cues else '-'} · media length {fmt_time(result.duration or 0, ms=False)}"
+    )
 
-t_txt, t_spk, t_srt, t_vtt = st.tabs(["📝 Transcript", "🗣️ Speakers", "🎞️ SRT", "🎞️ VTT"])
-
-with t_txt:
-    st.download_button("⬇️ Download .txt", result.text, f"{stem}.txt", "text/plain", key="dl_txt")
-    show_full_text(result.text, "transcript_full")
-
-with t_spk:
-    if result.words and result.speakers:
-        sp = speaker_transcript(result.words)
-        st.download_button("⬇️ Download speakers .txt", sp, f"{stem}.speakers.txt", "text/plain", key="dl_spk")
-        show_full_text(sp, "speakers_full")
-    else:
-        st.info("Enable speaker diarization (Verbatim mode) to get speaker-attributed output.")
-
-with t_srt:
-    if not result.words:
-        st.warning("No word timestamps: subtitle timing is estimated evenly. Enable timestamps for real timing.")
-    st.download_button("⬇️ Download .srt", srt, f"{stem}.srt", "text/plain", key="dl_srt")
-    show_code_full(srt, "srt_full")
-
-with t_vtt:
-    st.download_button("⬇️ Download .vtt", vtt, f"{stem}.vtt", "text/vtt", key="dl_vtt")
-    show_code_full(vtt, "vtt_full")
+    t_txt, t_spk, t_srt, t_vtt = st.tabs(["📝 Transcript", "🗣️ Speakers", "🎞️ SRT", "🎞️ VTT"])
+    with t_txt:
+        st.download_button("⬇️ Download .txt", result.text, f"{stem}.txt", "text/plain", key="dl_txt")
+        show_full_text(result.text, "transcript_full")
+    with t_spk:
+        if result.words and result.speakers:
+            sp = speaker_transcript(result.words)
+            st.download_button("⬇️ Download speakers .txt", sp, f"{stem}.speakers.txt", "text/plain", key="dl_spk")
+            show_full_text(sp, "speakers_full")
+        else:
+            st.info("Enable speaker diarization (Verbatim mode) to get speaker-attributed output.")
+    with t_srt:
+        if not result.words:
+            st.warning("No word timestamps: subtitle timing is estimated evenly. Enable timestamps for real timing.")
+        st.download_button("⬇️ Download .srt", srt, f"{stem}.srt", "text/plain", key="dl_srt")
+        show_code_full(srt, "srt_full")
+    with t_vtt:
+        st.download_button("⬇️ Download .vtt", vtt, f"{stem}.vtt", "text/vtt", key="dl_vtt")
+        show_code_full(vtt, "vtt_full")
 
 # ---------------------------------------------------------------------------
-# Step 3 - extras, each on its own button
+# Step 4 - extras, each on its own button
 # ---------------------------------------------------------------------------
-st.header("3️⃣ Generate more from this transcript")
-st.caption("Nothing here runs automatically - press a button to generate.")
+src = source_text()
+what = " + ".join(x for x, ok in (("transcript", result is not None),
+                                  ("image text", img is not None and st.session_state.get("use_images", True))) if ok)
+st.header("4️⃣ Generate more")
+st.caption(f"Source: **{what}** · nothing here runs automatically, press a button to generate.")
 
 x_tr, x_quiz, x_notes, x_mom = st.tabs(["🌐 Translation", "❓ Quiz (MCQs)", "📚 Notes", "📋 Meeting minutes"])
 
@@ -316,13 +411,15 @@ with x_tr:
     tc2.write("")
     tc2.write("")
     if tc2.button("🌐 Translate", type="primary", use_container_width=True):
-        with st.spinner(f"Translating to {target_lang} (transcript + timed subtitles)..."):
+        with st.spinner(f"Translating to {target_lang}..."):
             try:
                 gen = ContentGenerator(api_keys=API_KEYS)
-                tr_text = gen.translate(result.text, target_lang)
-                tr_cues = gen.translate_cues(cues, target_lang)
-                st.session_state["translations"][target_lang] = {
-                    "text": tr_text, "srt": to_srt(tr_cues), "vtt": to_vtt(tr_cues)}
+                tr_text = gen.translate(src, target_lang)
+                entry = {"text": tr_text}
+                if cues:
+                    tr_cues = gen.translate_cues(cues, target_lang)
+                    entry.update(srt=to_srt(tr_cues), vtt=to_vtt(tr_cues))
+                st.session_state.setdefault("translations", {})[target_lang] = entry
             except Exception as e:
                 st.error(f"Translation failed: {e}")
 
@@ -333,28 +430,30 @@ with x_tr:
         tr = translations[pick]
         d1, d2, d3 = st.columns(3)
         d1.download_button("⬇️ Translation .txt", tr["text"], f"{stem}.{pick}.txt", key=f"dl_tr_txt_{pick}")
-        d2.download_button("⬇️ Translated .srt", tr["srt"], f"{stem}.{pick}.srt", key=f"dl_tr_srt_{pick}")
-        d3.download_button("⬇️ Translated .vtt", tr["vtt"], f"{stem}.{pick}.vtt", key=f"dl_tr_vtt_{pick}")
-        p1, p2 = st.tabs(["Text", "SRT"])
-        with p1:
+        if "srt" in tr:
+            d2.download_button("⬇️ Translated .srt", tr["srt"], f"{stem}.{pick}.srt", key=f"dl_tr_srt_{pick}")
+            d3.download_button("⬇️ Translated .vtt", tr["vtt"], f"{stem}.{pick}.vtt", key=f"dl_tr_vtt_{pick}")
+            p1, p2 = st.tabs(["Text", "SRT"])
+            with p1:
+                show_full_text(tr["text"], f"tr_text_{pick}")
+            with p2:
+                show_code_full(tr["srt"], f"tr_srt_{pick}")
+        else:
             show_full_text(tr["text"], f"tr_text_{pick}")
-        with p2:
-            show_code_full(tr["srt"], f"tr_srt_{pick}")
 
 # ---- quiz -----------------------------------------------------------------
 with x_quiz:
     q1, q2, q3, q4 = st.columns([1, 1, 1, 1])
     n_q = q1.slider("Questions", 3, 20, 5)
     difficulty = q2.select_slider("Difficulty", ["easy", "medium", "hard"], value="medium")
-    quiz_lang = q3.selectbox("Quiz language", ["English", "Urdu", "Arabic"], index=0)
+    quiz_lang = q3.selectbox("Quiz language", OUTPUT_LANGS, index=0)
     q4.write("")
     q4.write("")
     if q4.button("❓ Generate quiz", type="primary", use_container_width=True):
         with st.spinner("Generating MCQs..."):
             try:
-                q = ContentGenerator(api_keys=API_KEYS).quiz(result.text, n=n_q, difficulty=difficulty, language=quiz_lang)
+                q = ContentGenerator(api_keys=API_KEYS).quiz(src, n=n_q, difficulty=difficulty, language=quiz_lang)
                 st.session_state["quiz"] = q
-                st.session_state.pop("quiz_submitted", None)
             except Exception as e:
                 st.error(f"Quiz generation failed: {e}")
 
@@ -389,7 +488,7 @@ with x_quiz:
 # ---- notes ----------------------------------------------------------------
 with x_notes:
     n1, n2, n3 = st.columns([2, 2, 1])
-    notes_lang = n1.selectbox("Notes language", ["English", "Urdu", "Arabic"], index=0, key="notes_lang")
+    notes_lang = n1.selectbox("Notes language", OUTPUT_LANGS, index=0, key="notes_lang")
     notes_kind = n2.radio("Format", ["Point-wise notes (detailed bullets)", "Summary notes (short)"],
                           index=0, key="notes_kind")
     n3.write("")
@@ -399,9 +498,9 @@ with x_notes:
             try:
                 gen = ContentGenerator(api_keys=API_KEYS)
                 if notes_kind.startswith("Point"):
-                    st.session_state["point_notes"] = gen.point_notes(result.text, language=notes_lang)
+                    st.session_state["point_notes"] = gen.point_notes(src, language=notes_lang)
                 else:
-                    st.session_state["notes"] = gen.notes(result.text, language=notes_lang)
+                    st.session_state["notes"] = gen.notes(src, language=notes_lang)
             except Exception as e:
                 st.error(f"Notes failed: {e}")
 
@@ -436,14 +535,14 @@ with x_notes:
 with x_mom:
     st.caption("For meetings, discussions, interviews or speeches: agenda, decisions, action items, next steps.")
     m1, m2, m3 = st.columns([2, 2, 1])
-    mom_lang = m1.selectbox("Minutes language", ["English", "Urdu", "Arabic"], index=0, key="mom_lang")
+    mom_lang = m1.selectbox("Minutes language", OUTPUT_LANGS, index=0, key="mom_lang")
     mom_date = m2.date_input("Meeting date", value=date.today(), key="mom_date")
     m3.write("")
     m3.write("")
     if m3.button("📋 Generate minutes", type="primary", use_container_width=True):
         with st.spinner("Writing minutes of meeting..."):
             try:
-                st.session_state["minutes"] = ContentGenerator(api_keys=API_KEYS).meeting_minutes(result.text, language=mom_lang)
+                st.session_state["minutes"] = ContentGenerator(api_keys=API_KEYS).meeting_minutes(src, language=mom_lang)
             except Exception as e:
                 st.error(f"Minutes failed: {e}")
 
@@ -460,8 +559,8 @@ with x_mom:
             for d in m.decisions or ["None recorded"]:
                 st.markdown(f"- {d}")
             st.markdown("**Open questions**")
-            for q in m.open_questions or ["None"]:
-                st.markdown(f"- {q}")
+            for qn in m.open_questions or ["None"]:
+                st.markdown(f"- {qn}")
         with c_b:
             st.markdown("**Discussion summary**")
             st.write(m.discussion_summary)

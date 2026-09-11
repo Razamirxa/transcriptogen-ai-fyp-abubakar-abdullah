@@ -64,6 +64,17 @@ class PointNotes(BaseModel):
     key_takeaways: list[str] = Field(description="5-8 most important points overall")
 
 
+class ImageExtraction(BaseModel):
+    """What the vision model found in one or more uploaded images (slides, whiteboard, notes)."""
+
+    title: str = Field(description="Short title for the image set")
+    content_type: str = Field(description="e.g. lecture slides, whiteboard, handwritten notes, document, diagram, photo")
+    extracted_text: str = Field(description="All readable text, in reading order; keep original language and script")
+    description: str = Field(description="What the images show, in 2-5 sentences")
+    key_points: list[str] = Field(description="Main ideas / facts visible in the images")
+    detected_language: str = Field(description="Language(s) of the text, e.g. English, Urdu, mixed")
+
+
 class ActionItem(BaseModel):
     task: str
     owner: str = Field(description="Person / speaker responsible, or 'Unassigned'")
@@ -186,6 +197,21 @@ Transcript:
 ---
 {text}
 ---"""
+
+IMAGE_EXTRACT_PROMPT = """You are given {n} image(s) uploaded by a student or professional (lecture slides, whiteboard photos,
+handwritten notes, documents, diagrams or screenshots).
+1. Extract ALL readable text exactly as written, in reading order (top-to-bottom, left-to-right; one image after another,
+   prefixed with "Image 1:", "Image 2:" ...). Keep the original language and script (Urdu in Urdu script, never Roman Urdu,
+   never Hindi/Devanagari). Do not translate, do not add words that are not there. Use "[unreadable]" for illegible parts.
+2. Describe what the images show in {language}.
+3. List the key points / facts visible, in {language}.
+Technical terms and names may stay in English."""
+
+IMAGE_QA_PROMPT = """Look carefully at the image(s) and answer the question below in {language}.
+Base the answer only on what is visible (and the extra context if given). If something is not visible, say so.
+Technical terms may stay in English; if {language} is Urdu use Urdu script.
+{context}
+Question: {question}"""
 
 MAX_CHARS = 120_000  # keep well inside the context window for long lectures
 
@@ -424,6 +450,33 @@ class ContentGenerator:
             QUIZ_PROMPT.format(n=n, difficulty=difficulty, language=language, text=text[:MAX_CHARS]), Quiz
         )
 
+    # -- images --------------------------------------------------------------
+    @staticmethod
+    def _image_parts(images: list[tuple[bytes, str]]) -> list[Any]:
+        from google.genai import types as gtypes
+
+        return [gtypes.Part.from_bytes(data=b, mime_type=mime or "image/jpeg") for b, mime in images]
+
+    def analyse_images(self, images: list[tuple[bytes, str]], language: str = "English") -> ImageExtraction:
+        """OCR + description + key points for one or more images [(bytes, mime_type), ...]."""
+        if not images:
+            raise ValueError("no images given")
+        prompt = IMAGE_EXTRACT_PROMPT.format(n=len(images), language=language)
+        r = self._generate(
+            self._image_parts(images) + [prompt],
+            {"temperature": 0.1, "response_mime_type": "application/json", "response_schema": ImageExtraction},
+        )
+        parsed = getattr(r, "parsed", None)
+        return parsed if parsed is not None else ImageExtraction.model_validate_json(_clean(r.text or "") or "{}")
+
+    def ask_images(self, images: list[tuple[bytes, str]], question: str, *, language: str = "English",
+                   context: str = "") -> str:
+        """Free-form question about the images (optionally with transcript context)."""
+        ctx = f"Extra context (transcript of the related lecture/meeting):\n---\n{context[:20_000]}\n---\n" if context else ""
+        prompt = IMAGE_QA_PROMPT.format(language=language, context=ctx, question=question.strip())
+        r = self._generate(self._image_parts(images) + [prompt], {"temperature": 0.3})
+        return _clean(r.text or "")
+
     def notes(self, text: str, language: str = "English") -> StudyNotes:
         return self._json(NOTES_PROMPT.format(language=language, text=text[:MAX_CHARS]), StudyNotes, temperature=0.3)
 
@@ -432,6 +485,14 @@ class ContentGenerator:
 
     def meeting_minutes(self, text: str, language: str = "English") -> MeetingMinutes:
         return self._json(MINUTES_PROMPT.format(language=language, text=text[:MAX_CHARS]), MeetingMinutes, temperature=0.2)
+
+
+def image_extraction_to_markdown(x: ImageExtraction) -> str:
+    return (
+        f"# {x.title}\n\n**Type:** {x.content_type}  \n**Language:** {x.detected_language}\n\n"
+        f"## Description\n{x.description}\n\n## Key points\n" + "\n".join(f"- {k}" for k in x.key_points)
+        + f"\n\n## Extracted text\n{x.extracted_text}\n"
+    )
 
 
 def notes_to_markdown(n: StudyNotes, title: str = "Notes") -> str:
