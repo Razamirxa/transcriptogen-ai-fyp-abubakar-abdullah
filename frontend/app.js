@@ -7,7 +7,8 @@
   // ---------- theme ----------
   const root = document.documentElement;
   const applyTheme = (t) => { root.dataset.theme = t; document.querySelector(".tt-label").textContent = t === "dark" ? "Dark" : "Light"; };
-  try { applyTheme(localStorage.getItem("tg-theme") || "light"); } catch { applyTheme("light"); }
+  const qTheme = new URLSearchParams(location.search).get("theme");   // ?theme=dark for links / screenshots
+  try { applyTheme(qTheme || localStorage.getItem("tg-theme") || "light"); } catch { applyTheme(qTheme || "light"); }
   $("themeToggle").onclick = () => { const t = root.dataset.theme === "dark" ? "light" : "dark"; applyTheme(t); try { localStorage.setItem("tg-theme", t); } catch {} };
 
   // ---------- hero demo (orbit, waveform, typing transcript) ----------
