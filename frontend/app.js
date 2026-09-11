@@ -14,6 +14,10 @@
   // ---------- hero demo (orbit, waveform, typing transcript) ----------
   // 3D illustration + parallax (layers move by data-depth with the mouse; card tilts)
   const art = $("heroArt"); art.innerHTML = window.TG_SCENE.hero;
+  const orbit = $("orbit");
+  [["English", "var(--accent)"], ["اردو", "var(--amber)"], ["العربية", "#10B981"], ["हिन्दी", "#EC4899"], ["Español", "#0EA5E9"], ["Français", "#8B5CF6"]]
+    .forEach(([label, c], i) => { const o = document.createElement("div"); o.className = "o"; o.style.transform = `rotateZ(${i * 60}deg) translateX(145px)`;
+      o.innerHTML = `<div class="un" style="transform:rotateZ(${-i * 60}deg)"><div class="chip3d" style="--c:${c}"><i></i>${label}</div></div>`; orbit.appendChild(o); });
   document.querySelectorAll("[data-tile]").forEach((el) => { el.innerHTML = window.TG_SCENE.tiles[el.dataset.tile]; });
   const stage = document.querySelector(".stage"); const layers = art.querySelectorAll(".layer"); const card = document.querySelector(".float-card");
   stage.classList.add("parallax");

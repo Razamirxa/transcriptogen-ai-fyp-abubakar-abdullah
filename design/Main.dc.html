@@ -34,8 +34,14 @@
     /* ---- 3D illustration (layered SVG) ---- */
     .stage { perspective: 1400px; perspective-origin: 60% 40%; }
     .p3d { transform-style: preserve-3d; }
-    .hero-art { position: absolute; left: -46px; top: 40px; width: 360px; height: 430px; }
-    .hero-art .scene { width: 100%; height: 100%; overflow: visible; }
+    .hero-art { position: absolute; left: -46px; top: 40px; width: 360px; height: 430px; perspective: 900px; transform-style: preserve-3d; }
+    .mic3d { position: absolute; inset: 0; transform-style: preserve-3d; animation: turn 9s ease-in-out infinite alternate; }
+    @keyframes turn { from { transform: rotateY(-30deg) rotateX(5deg); } to { transform: rotateY(30deg) rotateX(5deg); } }
+    .mic3d .scene { width: 100%; height: 100%; overflow: visible; }
+    .orbit { position: absolute; left: 40%; top: 66%; width: 0; height: 0; transform-style: preserve-3d; animation: orbit 22s linear infinite; }
+    @keyframes orbit { from { transform: rotateX(74deg) rotateZ(0deg); } to { transform: rotateX(74deg) rotateZ(360deg); } }
+    .chip3d { animation: counter 22s linear infinite; transform-style: preserve-3d; }
+    @keyframes counter { from { transform: rotateZ(0deg) rotateX(-74deg); } to { transform: rotateZ(-360deg) rotateX(-74deg); } }
     .layer { transform-box: fill-box; transform-origin: center; }
     @keyframes floatA { 0%, 100% { translate: 0 0; } 50% { translate: 0 -10px; } }
     @keyframes floatB { 0%, 100% { translate: 0 0; } 50% { translate: 0 -14px; } }
@@ -126,11 +132,23 @@
       </div>
     </div>
 
-    <!-- 3D stage: orbit ring + sound cube + floating transcript stack -->
+    <!-- 3D stage: orbit ring + turntable microphone + floating transcript stack -->
     <div class="stage rise rise-2" style="position: relative; height: 640px;">
       <div class="p3d" style="position: absolute; inset: 0;">
 
         <div class="hero-art">
+          <div class="orbit">
+            <sc-for list="{{orbit}}" as="o" hint-placeholder-count="6">
+              <div class="p3d" style="position: absolute; left: 0; top: 0; transform: rotateZ({{o.deg}}deg) translateX(145px);">
+                <div class="p3d" style="transform: rotateZ({{o.neg}}deg);">
+                  <div class="chip3d" style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px; font-size: 12px; font-weight: 800; white-space: nowrap; background: var(--card); border: 1px solid var(--border); color: var(--text); box-shadow: 0 8px 20px -10px rgba(0,0,0,0.35);">
+                    <span style="width: 8px; height: 8px; border-radius: 999px; background: {{o.color}};"></span>{{o.label}}
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <div class="mic3d">
 
 <svg class="scene" viewBox="0 0 520 620" width="520" height="620" xmlns="http://www.w3.org/2000/svg" aria-label="3D microphone with sound waves, subtitle cards and language chips">
   
@@ -196,21 +214,12 @@
     </g>
   </g>
 
-  <!-- language chips -->
-  <g class="layer float-c" data-depth="1.25" font-family="Manrope, sans-serif" font-weight="800" font-size="12">
-    <g transform="translate(20 400)" filter="url(#shadow)">
-      <rect width="92" height="34" rx="17" fill="var(--card)" stroke="var(--border)"/><circle cx="18" cy="17" r="5" fill="var(--accent)"/><text x="32" y="21" fill="var(--text)">English</text>
-    </g>
-    <g transform="translate(40 450)" filter="url(#shadow)">
-      <rect width="78" height="34" rx="17" fill="var(--card)" stroke="var(--border)"/><circle cx="18" cy="17" r="5" fill="var(--amber)"/><text x="32" y="23" font-family="'Noto Nastaliq Urdu', serif" font-size="13" fill="var(--text)">اردو</text>
-    </g>
-    <g transform="translate(400 300)" filter="url(#shadow)">
-      <rect width="86" height="34" rx="17" fill="var(--card)" stroke="var(--border)"/><circle cx="18" cy="17" r="5" fill="#10B981"/><text x="32" y="23" font-size="13" fill="var(--text)">العربية</text>
-    </g>
+  <g class="layer float-c" data-depth="1.25">
     <!-- sparkle -->
     <g transform="translate(120 70)" fill="url(#gAmber)"><path class="spark" d="M16 0l4 12 12 4-12 4-4 12-4-12L0 16l12-4z"/></g>
   </g>
 </svg>
+          </div>
         </div>
 
         <!-- stacked subtitle cards (behind) -->
@@ -544,8 +553,10 @@ class Component extends DCLogic {
     });
     const clock = src[li].t;
     const bars = this._bars.map((b, i) => ({ ...b, color: i % 9 === 0 ? t.amber : accent }));
+    const langs = [["English", accent], ["اردو", t.amber], ["العربية", "#10B981"], ["हिन्दी", "#EC4899"], ["Español", "#0EA5E9"], ["Français", "#8B5CF6"]];
+    const orbit = langs.map(([label, color], i) => ({ label, color, deg: i * 60, neg: -i * 60 }));
     return {
-      accent, t, lines, bars, clock,
+      accent, t, lines, bars, clock, orbit,
       isDark: dark, isLight: !dark,
       themeLabel: dark ? "Dark" : "Light",
       toggleTheme: () => this.setState({ dark: !this.state.dark })

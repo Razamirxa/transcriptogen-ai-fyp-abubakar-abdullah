@@ -69,17 +69,7 @@ window.TG_SCENE = (() => {
     </g>
   </g>
 
-  <!-- language chips -->
-  <g class="layer float-c" data-depth="1.25" font-family="Manrope, sans-serif" font-weight="800" font-size="12">
-    <g transform="translate(20 400)" filter="url(#shadow)">
-      <rect width="92" height="34" rx="17" fill="var(--card)" stroke="var(--border)"/><circle cx="18" cy="17" r="5" fill="var(--accent)"/><text x="32" y="21" fill="var(--text)">English</text>
-    </g>
-    <g transform="translate(40 450)" filter="url(#shadow)">
-      <rect width="78" height="34" rx="17" fill="var(--card)" stroke="var(--border)"/><circle cx="18" cy="17" r="5" fill="var(--amber)"/><text x="32" y="23" font-family="'Noto Nastaliq Urdu', serif" font-size="13" fill="var(--text)">اردو</text>
-    </g>
-    <g transform="translate(400 300)" filter="url(#shadow)">
-      <rect width="86" height="34" rx="17" fill="var(--card)" stroke="var(--border)"/><circle cx="18" cy="17" r="5" fill="#10B981"/><text x="32" y="23" font-size="13" fill="var(--text)">العربية</text>
-    </g>
+  <g class="layer float-c" data-depth="1.25">
     <!-- sparkle -->
     <g transform="translate(120 70)" fill="url(#gAmber)"><path class="spark" d="M16 0l4 12 12 4-12 4-4 12-4-12L0 16l12-4z"/></g>
   </g>

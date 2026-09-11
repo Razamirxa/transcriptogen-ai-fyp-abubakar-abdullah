@@ -41,7 +41,7 @@
       "x": 1560,
       "y": -170,
       "w": 520,
-      "text": "Main direction: Light Studio (light by default, dark via the toggle in the header - click it, it works).\nBrand indigo #4F46E5 as accent, amber for the second speaker, Syne + Manrope type, Noto Nastaliq for Urdu.\n3D: illustrated microphone scene (sound waves, subtitle card, language chips; parallax on the live site), floating transcript stack, isometric step objects, tilt-on-hover feature cards.\nAccent chip changes the brand colour; Live demo chip switches the hero transcript to Urdu. The two sketches below-right are alternates, not finished pages."
+      "text": "Main direction: Light Studio (light by default, dark via the toggle in the header - click it, it works).\nBrand indigo #4F46E5 as accent, amber for the second speaker, Syne + Manrope type, Noto Nastaliq for Urdu.\n3D: 3D turntable microphone with orbiting language chips (mouse parallax on the live site), floating transcript stack, isometric step objects, tilt-on-hover feature cards.\nAccent chip changes the brand colour; Live demo chip switches the hero transcript to Urdu. The two sketches below-right are alternates, not finished pages."
     }
   ],
   "launch": {
