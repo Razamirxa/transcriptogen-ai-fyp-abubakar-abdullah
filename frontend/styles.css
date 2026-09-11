@@ -75,27 +75,13 @@ a { color: var(--accent); text-decoration: none; } a:hover { color: var(--accent
 .stage { perspective: 1400px; perspective-origin: 60% 40%; }
 .stage-inner { position: relative; height: 620px; }
 .p3d { transform-style: preserve-3d; }
-.orbit { position: absolute; left: 46%; top: 66%; width: 0; height: 0; transform-style: preserve-3d; animation: orbit 26s linear infinite; }
-@keyframes orbit { from { transform: rotateX(72deg) rotateZ(0); } to { transform: rotateX(72deg) rotateZ(360deg); } }
-.orbit .o { position: absolute; left: 0; top: 0; transform-style: preserve-3d; }
-.orbit .un { transform-style: preserve-3d; }
-.chip3d { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px; font-size: 12px; font-weight: 800; white-space: nowrap; box-shadow: 0 8px 20px -10px rgba(0,0,0,.35); animation: counter 26s linear infinite; transform-style: preserve-3d; }
-@keyframes counter { from { transform: rotateZ(0) rotateX(-72deg); } to { transform: rotateZ(-360deg) rotateX(-72deg); } }
-.chip3d i { width: 8px; height: 8px; border-radius: 999px; background: var(--c); }
-.cube-wrap { position: absolute; left: 34px; top: 96px; width: 140px; height: 140px; transform-style: preserve-3d; }
-.cube { position: absolute; inset: 0; transform-style: preserve-3d; animation: spin 22s linear infinite; }
-@keyframes spin { from { transform: rotateX(-18deg) rotateY(0); } to { transform: rotateX(-18deg) rotateY(360deg); } }
-.face { position: absolute; inset: 0; border: 1px solid var(--accent); background: var(--faceBg); background-image: repeating-linear-gradient(90deg, var(--accent) 0 6px, transparent 6px 14px); background-size: 100% 46%; background-repeat: no-repeat; background-position: center; }
-.face.plain { background-image: none; }
-.f1 { transform: translateZ(70px); } .f2 { transform: rotateY(180deg) translateZ(70px); } .f3 { transform: rotateY(90deg) translateZ(70px); } .f4 { transform: rotateY(-90deg) translateZ(70px); } .f5 { transform: rotateX(90deg) translateZ(70px); } .f6 { transform: rotateX(-90deg) translateZ(70px); }
-.cube-shadow { position: absolute; left: -10px; right: -10px; bottom: -70px; height: 26px; border-radius: 999px; background: radial-gradient(closest-side, var(--glow), transparent); filter: blur(6px); }
-.stack { position: absolute; left: 176px; top: 120px; width: 430px; height: 330px; border-radius: 24px; background: var(--card); border: 1px solid var(--border); }
+.stack { position: absolute; left: 252px; top: 120px; width: 390px; height: 330px; border-radius: 24px; background: var(--card); border: 1px solid var(--border); }
 .stack-2 { opacity: .8; animation: bob2 7s ease-in-out infinite; } .stack-3 { opacity: .55; animation: bob3 8s ease-in-out infinite; }
 @keyframes bob2 { 0%,100% { transform: translateZ(-90px) translate(22px, 30px) rotateY(-14deg) rotateX(6deg); } 50% { transform: translateZ(-90px) translate(22px, 18px) rotateY(-16deg) rotateX(7deg); } }
 @keyframes bob3 { 0%,100% { transform: translateZ(-180px) translate(44px, 60px) rotateY(-14deg) rotateX(6deg); } 50% { transform: translateZ(-180px) translate(44px, 44px) rotateY(-12deg) rotateX(5deg); } }
-.float-card { position: absolute; left: 176px; top: 120px; width: 430px; border-radius: 24px; background: var(--card) !important; box-shadow: var(--shadow); overflow: hidden; animation: bob 6s ease-in-out infinite; transform-style: preserve-3d; }
+.float-card { position: absolute; left: 252px; top: 120px; width: 390px; border-radius: 24px; background: var(--card) !important; box-shadow: var(--shadow); overflow: hidden; animation: bob 6s ease-in-out infinite; transform-style: preserve-3d; }
 @keyframes bob { 0%,100% { transform: translateY(0) rotateY(-14deg) rotateX(6deg); } 50% { transform: translateY(-14px) rotateY(-11deg) rotateX(4deg); } }
-@media (max-width: 1100px) { .cube-wrap { left: 10px; } .float-card, .stack { left: 120px; width: min(430px, calc(100% - 130px)); } }
+@media (max-width: 1100px) { .hero-art { left: -20px; width: 300px; } .float-card, .stack { left: 150px; width: min(430px, calc(100% - 160px)); } }
 .fc-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); }
 .badge-live { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 8px; background: var(--okBg); color: var(--ok); font-size: 12px; font-weight: 700; letter-spacing: .06em; }
 .wave { display: flex; align-items: flex-end; gap: 4px; height: 84px; padding: 16px 20px 10px; }
@@ -131,12 +117,6 @@ a { color: var(--accent); text-decoration: none; } a:hover { color: var(--accent
 .card-step h3, .feat h3 { margin: 0; font-size: 19px; font-weight: 700; } .card-step p, .feat p { margin: 0; font-size: 15px; line-height: 1.55; }
 .step-no { font-size: 13px; font-weight: 700; color: var(--accent); letter-spacing: .12em; }
 .card:hover { transform: translateY(-6px) rotateX(4deg) rotateY(-4deg); border-color: var(--accent); }
-.tile-wrap { height: 120px; display: grid; place-items: center; perspective: 900px; }
-.tile { position: relative; width: 84px; height: 84px; transform-style: preserve-3d; animation: tile 5s ease-in-out infinite; }
-.t2 { animation-delay: .6s; } .t3 { animation-delay: 1.2s; } .t4 { animation-delay: 1.8s; }
-@keyframes tile { 0%,100% { transform: rotateX(58deg) rotateZ(-42deg) translateZ(0); } 50% { transform: rotateX(58deg) rotateZ(-42deg) translateZ(22px); } }
-.tile-top { position: absolute; inset: 0; border-radius: 10px; background: var(--c); transform: translateZ(18px); display: grid; place-items: center; }
-.tile-base { position: absolute; inset: 0; border-radius: 10px; background: var(--cd); }
 .showcase { display: grid; grid-template-columns: 1fr 1.1fr; gap: 48px; align-items: center; padding: 48px; border-radius: 28px; }
 @media (max-width: 900px) { .showcase { grid-template-columns: 1fr; } }
 .eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .12em; margin-bottom: 16px; }
@@ -175,3 +155,24 @@ a { color: var(--accent); text-decoration: none; } a:hover { color: var(--accent
 .q .opt.right { border-color: #10B981; background: rgba(16,185,129,.12); } .q .opt.wrong { border-color: #E11D48; background: rgba(225,29,72,.10); }
 .q .why { font-size: 13px; color: var(--muted); }
 .footer { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; padding: 40px clamp(20px, 5vw, 72px); border-top: 1px solid var(--border); margin-top: 40px; }
+
+/* ---- hero illustration (layered SVG with mouse parallax) ---- */
+.hero-art { position: absolute; left: -46px; top: 40px; width: 360px; height: 430px; transform-style: preserve-3d; }
+.hero-art .scene { width: 100%; height: 100%; overflow: visible; }
+.layer { transition: transform .18s ease-out; will-change: transform; transform-box: fill-box; transform-origin: center; }
+.stage.parallax .float-card { transition: transform .25s ease-out; }
+@keyframes floatA { 0%,100% { translate: 0 0; } 50% { translate: 0 -10px; } }
+@keyframes floatB { 0%,100% { translate: 0 0; } 50% { translate: 0 -14px; } }
+@keyframes floatC { 0%,100% { translate: 0 0; } 50% { translate: 0 -8px; } }
+.float-a { animation: floatA 6s ease-in-out infinite; } .float-b { animation: floatB 7s ease-in-out infinite; } .float-c { animation: floatC 5s ease-in-out infinite; }
+@keyframes dash { from { stroke-dashoffset: 400; } to { stroke-dashoffset: 0; } }
+.wave1, .wave2, .wave3 { stroke-dasharray: 400; animation: dash 3.2s ease-in-out infinite alternate; }
+.wave2 { animation-delay: .25s; } .wave3 { animation-delay: .5s; }
+@keyframes twinkle { 0%,100% { transform: scale(1) rotate(0); opacity: 1; } 50% { transform: scale(.6) rotate(25deg); opacity: .5; } }
+.spark { animation: twinkle 2.4s ease-in-out infinite; transform-origin: 16px 16px; }
+/* ---- isometric step tiles ---- */
+.tile-wrap { height: 130px; display: grid; place-items: center; perspective: 700px; }
+.tile-svg { width: 130px; height: 130px; overflow: visible; transition: transform .35s ease; transform-style: preserve-3d; }
+.card-step:hover .tile-svg { transform: rotateX(10deg) rotateY(-12deg) translateY(-8px) scale(1.06); }
+.tile-obj { transform-box: fill-box; transform-origin: center; animation: floatA 4.5s ease-in-out infinite; }
+.card-step:nth-child(2) .tile-obj { animation-delay: .5s; } .card-step:nth-child(3) .tile-obj { animation-delay: 1s; } .card-step:nth-child(4) .tile-obj { animation-delay: 1.5s; }

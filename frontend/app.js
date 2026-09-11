@@ -12,10 +12,18 @@
   $("themeToggle").onclick = () => { const t = root.dataset.theme === "dark" ? "light" : "dark"; applyTheme(t); try { localStorage.setItem("tg-theme", t); } catch {} };
 
   // ---------- hero demo (orbit, waveform, typing transcript) ----------
-  const orbit = $("orbit");
-  [["English", "var(--accent)"], ["اردو", "var(--amber)"], ["العربية", "#10B981"], ["हिन्दी", "#EC4899"], ["Español", "#0EA5E9"], ["Français", "#8B5CF6"]]
-    .forEach(([label, c], i) => { const o = document.createElement("div"); o.className = "o"; o.style.transform = `rotateZ(${i * 60}deg) translateX(270px)`;
-      o.innerHTML = `<div class="un" style="transform:rotateZ(${-i * 60}deg)"><div class="chip3d surface" style="--c:${c}"><i></i>${label}</div></div>`; orbit.appendChild(o); });
+  // 3D illustration + parallax (layers move by data-depth with the mouse; card tilts)
+  const art = $("heroArt"); art.innerHTML = window.TG_SCENE.hero;
+  document.querySelectorAll("[data-tile]").forEach((el) => { el.innerHTML = window.TG_SCENE.tiles[el.dataset.tile]; });
+  const stage = document.querySelector(".stage"); const layers = art.querySelectorAll(".layer"); const card = document.querySelector(".float-card");
+  stage.classList.add("parallax");
+  const setParallax = (nx, ny) => {  // nx, ny in [-1, 1]
+    layers.forEach((l) => { const d = +l.dataset.depth || 0; l.style.transform = `translate(${(nx * 22 * d).toFixed(1)}px, ${(ny * 16 * d).toFixed(1)}px)`; });
+    if (card) card.style.transform = `translateY(-6px) rotateY(${(-14 + nx * 8).toFixed(1)}deg) rotateX(${(6 - ny * 6).toFixed(1)}deg)`;
+  };
+  stage.addEventListener("mousemove", (e) => { const r = stage.getBoundingClientRect(); setParallax(((e.clientX - r.left) / r.width - .5) * 2, ((e.clientY - r.top) / r.height - .5) * 2); });
+  stage.addEventListener("mouseleave", () => { layers.forEach((l) => l.style.transform = ""); if (card) card.style.transform = ""; });
+  if (window.DeviceOrientationEvent && matchMedia("(pointer: coarse)").matches) window.addEventListener("deviceorientation", (e) => setParallax(Math.max(-1, Math.min(1, (e.gamma || 0) / 30)), Math.max(-1, Math.min(1, ((e.beta || 0) - 45) / 30))));
   const wave = $("demoWave");
   for (let i = 0; i < 48; i++) { const b = document.createElement("i"); b.style.height = (12 + Math.round(Math.abs(Math.sin(i * .55)) * 40 + (i % 5) * 3)) + "px";
     b.style.animationDelay = (-((i * .09) % 1.4)).toFixed(2) + "s"; b.style.animationDuration = (1.1 + ((i * 7) % 5) * .14).toFixed(2) + "s"; if (i % 9 === 0) b.style.background = "var(--amber)"; wave.appendChild(b); }

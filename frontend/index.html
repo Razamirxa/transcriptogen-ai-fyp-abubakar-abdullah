@@ -53,14 +53,7 @@
 
   <div class="stage rise rise-2">
     <div class="p3d stage-inner">
-      <div class="orbit" id="orbit"></div>
-      <div class="cube-wrap">
-        <div class="cube">
-          <div class="face f1"></div><div class="face f2"></div><div class="face f3"></div>
-          <div class="face f4"></div><div class="face f5 plain"></div><div class="face f6 plain"></div>
-        </div>
-        <div class="cube-shadow"></div>
-      </div>
+      <div class="hero-art" id="heroArt"></div>
       <div class="stack stack-3"></div>
       <div class="stack stack-2"></div>
       <div class="float-card surface">
@@ -88,10 +81,10 @@
     <p class="muted">Nothing is generated automatically. Every output has its own button, so you only pay for what you ask for.</p>
   </div>
   <div class="grid4 stage">
-    <div class="surface card-step"><div class="tile-wrap"><div class="tile t1"><div class="tile-top" style="--c:var(--accent);--cd:#3730A3"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg></div><div class="tile-base" style="--cd:#3730A3"></div></div></div><div class="step-no display">STEP 01</div><h3>Upload or link</h3><p class="muted">Audio or video up to 2 GB, or a YouTube URL. Pick a language hint so Urdu never comes back as Hindi.</p></div>
-    <div class="surface card-step"><div class="tile-wrap"><div class="tile t2"><div class="tile-top" style="--c:var(--amber);--cd:#92400E"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m3 16 5-5 4 4 3-3 6 6"/><circle cx="16" cy="9" r="1.5"/></svg></div><div class="tile-base" style="--cd:#92400E"></div></div></div><div class="step-no display">STEP 02</div><h3>Add slides or notes</h3><p class="muted">Optional. Photos of slides, whiteboards or handwritten notes are read and kept alongside the transcript.</p></div>
-    <div class="surface card-step"><div class="tile-wrap"><div class="tile t3"><div class="tile-top" style="--c:#10B981;--cd:#047857"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 15h6M15 15h2M7 11h2M11 11h6"/></svg></div><div class="tile-base" style="--cd:#047857"></div></div></div><div class="step-no display">STEP 03</div><h3>Review the transcript</h3><p class="muted">Speakers, timestamps, SRT and VTT with real timing. Full previews, one-click downloads.</p></div>
-    <div class="surface card-step"><div class="tile-wrap"><div class="tile t4"><div class="tile-top" style="--c:#EC4899;--cd:#9D174D"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></div><div class="tile-base" style="--cd:#9D174D"></div></div></div><div class="step-no display">STEP 04</div><h3>Generate what you need</h3><p class="muted">Translation, MCQ quiz, point-wise notes or minutes of meeting, each from its own button.</p></div>
+    <div class="surface card-step"><div class="tile-wrap" data-tile="upload"></div><div class="step-no display">STEP 01</div><h3>Upload or link</h3><p class="muted">Audio or video up to 2 GB, or a YouTube URL. Pick a language hint so Urdu never comes back as Hindi.</p></div>
+    <div class="surface card-step"><div class="tile-wrap" data-tile="slides"></div><div class="step-no display">STEP 02</div><h3>Add slides or notes</h3><p class="muted">Optional. Photos of slides, whiteboards or handwritten notes are read and kept alongside the transcript.</p></div>
+    <div class="surface card-step"><div class="tile-wrap" data-tile="subs"></div><div class="step-no display">STEP 03</div><h3>Review the transcript</h3><p class="muted">Speakers, timestamps, SRT and VTT with real timing. Full previews, one-click downloads.</p></div>
+    <div class="surface card-step"><div class="tile-wrap" data-tile="notes"></div><div class="step-no display">STEP 04</div><h3>Generate what you need</h3><p class="muted">Translation, MCQ quiz, point-wise notes or minutes of meeting, each from its own button.</p></div>
   </div>
 </section>
 
@@ -225,6 +218,7 @@
   <div class="row gap24"><a href="/docs">API docs</a><span>Privacy</span><span>Terms</span></div>
 </footer>
 
+<script src="/static/scene.js"></script>
 <script src="/static/app.js"></script>
 </body>
 </html>
