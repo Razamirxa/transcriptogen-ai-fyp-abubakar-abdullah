@@ -12,13 +12,21 @@ from __future__ import annotations
 import tempfile
 import threading
 import time
+from datetime import date
 from pathlib import Path
 
 import streamlit as st
 
 from transcriptogen import config
 from transcriptogen.config import LANGUAGE_OPTIONS, TRANSLATION_TARGETS, TranscribeOptions
-from transcriptogen.generators import ContentGenerator, has_devanagari, quiz_to_markdown
+from transcriptogen.generators import (
+    ContentGenerator,
+    has_devanagari,
+    minutes_to_markdown,
+    notes_to_markdown,
+    point_notes_to_markdown,
+    quiz_to_markdown,
+)
 from transcriptogen.subtitles import (
     cues_from_text,
     cues_from_words,
@@ -95,7 +103,7 @@ def safe_name(stem: str) -> str:
 
 
 def reset_outputs() -> None:
-    for k in ("result", "fixed_cues", "stem", "translations", "quiz", "notes"):
+    for k in ("result", "fixed_cues", "stem", "translations", "quiz", "notes", "point_notes", "minutes"):
         st.session_state.pop(k, None)
 
 
@@ -299,7 +307,7 @@ with t_vtt:
 st.header("3️⃣ Generate more from this transcript")
 st.caption("Nothing here runs automatically - press a button to generate.")
 
-x_tr, x_quiz, x_notes = st.tabs(["🌐 Translation", "❓ Quiz (MCQs)", "📚 Study notes"])
+x_tr, x_quiz, x_notes, x_mom = st.tabs(["🌐 Translation", "❓ Quiz (MCQs)", "📚 Notes", "📋 Meeting minutes"])
 
 # ---- translation ----------------------------------------------------------
 with x_tr:
@@ -380,30 +388,93 @@ with x_quiz:
 
 # ---- notes ----------------------------------------------------------------
 with x_notes:
-    n1, n2 = st.columns([2, 1])
-    notes_lang = n1.selectbox("Notes language", ["English", "Urdu", "Arabic"], index=0)
-    n2.write("")
-    n2.write("")
-    if n2.button("📚 Generate notes", type="primary", use_container_width=True):
-        with st.spinner("Summarising..."):
+    n1, n2, n3 = st.columns([2, 2, 1])
+    notes_lang = n1.selectbox("Notes language", ["English", "Urdu", "Arabic"], index=0, key="notes_lang")
+    notes_kind = n2.radio("Format", ["Point-wise notes (detailed bullets)", "Summary notes (short)"],
+                          index=0, key="notes_kind")
+    n3.write("")
+    n3.write("")
+    if n3.button("📚 Generate notes", type="primary", use_container_width=True):
+        with st.spinner("Writing notes..."):
             try:
-                st.session_state["notes"] = ContentGenerator(api_keys=API_KEYS).notes(result.text, language=notes_lang)
+                gen = ContentGenerator(api_keys=API_KEYS)
+                if notes_kind.startswith("Point"):
+                    st.session_state["point_notes"] = gen.point_notes(result.text, language=notes_lang)
+                else:
+                    st.session_state["notes"] = gen.notes(result.text, language=notes_lang)
             except Exception as e:
                 st.error(f"Notes failed: {e}")
 
+    p = st.session_state.get("point_notes")
+    if p:
+        st.markdown(f"### 📌 {p.title}")
+        for s in p.sections:
+            st.markdown(f"**{s.heading}**")
+            for pt in s.points:
+                st.markdown(f"- {pt}")
+        st.markdown("**Key takeaways**")
+        for k in p.key_takeaways:
+            st.markdown(f"- {k}")
+        st.download_button("⬇️ Point-wise notes .md", point_notes_to_markdown(p), f"{stem}.points.md", key="dl_points")
+
     n = st.session_state.get("notes")
     if n:
-        st.markdown("### Summary")
+        if p:
+            st.divider()
+        st.markdown("### 📝 Summary notes")
         st.write(n.summary)
-        st.markdown("### Key points")
+        st.markdown("**Key points**")
         for kp in n.key_points:
             st.markdown(f"- {kp}")
-        st.markdown("### Chapters")
+        st.markdown("**Chapters**")
         for i, ch in enumerate(n.chapters, 1):
             st.markdown(f"{i}. {ch}")
         st.markdown("**Keywords:** " + ", ".join(n.keywords))
-        notes_md = (f"# Notes: {stem}\n\n## Summary\n{n.summary}\n\n## Key points\n"
-                    + "\n".join(f"- {k}" for k in n.key_points)
-                    + "\n\n## Chapters\n" + "\n".join(f"{i}. {c}" for i, c in enumerate(n.chapters, 1))
-                    + "\n\n**Keywords:** " + ", ".join(n.keywords) + "\n")
-        st.download_button("⬇️ Notes .md", notes_md, f"{stem}.notes.md", key="dl_notes")
+        st.download_button("⬇️ Summary notes .md", notes_to_markdown(n, f"Notes: {stem}"), f"{stem}.notes.md", key="dl_notes")
+
+# ---- meeting minutes --------------------------------------------------------
+with x_mom:
+    st.caption("For meetings, discussions, interviews or speeches: agenda, decisions, action items, next steps.")
+    m1, m2, m3 = st.columns([2, 2, 1])
+    mom_lang = m1.selectbox("Minutes language", ["English", "Urdu", "Arabic"], index=0, key="mom_lang")
+    mom_date = m2.date_input("Meeting date", value=date.today(), key="mom_date")
+    m3.write("")
+    m3.write("")
+    if m3.button("📋 Generate minutes", type="primary", use_container_width=True):
+        with st.spinner("Writing minutes of meeting..."):
+            try:
+                st.session_state["minutes"] = ContentGenerator(api_keys=API_KEYS).meeting_minutes(result.text, language=mom_lang)
+            except Exception as e:
+                st.error(f"Minutes failed: {e}")
+
+    m = st.session_state.get("minutes")
+    if m:
+        st.markdown(f"### 📋 {m.title}")
+        st.markdown(f"**Date:** {mom_date}  ·  **Type:** {m.meeting_type}  ·  **Participants:** {', '.join(m.participants) or '-'}")
+        c_a, c_b = st.columns(2)
+        with c_a:
+            st.markdown("**Agenda**")
+            for i, a in enumerate(m.agenda, 1):
+                st.markdown(f"{i}. {a}")
+            st.markdown("**Decisions**")
+            for d in m.decisions or ["None recorded"]:
+                st.markdown(f"- {d}")
+            st.markdown("**Open questions**")
+            for q in m.open_questions or ["None"]:
+                st.markdown(f"- {q}")
+        with c_b:
+            st.markdown("**Discussion summary**")
+            st.write(m.discussion_summary)
+            st.markdown("**Key points**")
+            for k in m.key_points:
+                st.markdown(f"- {k}")
+            st.markdown("**Next steps**")
+            for s in m.next_steps or ["None"]:
+                st.markdown(f"- {s}")
+        st.markdown("**Action items**")
+        if m.action_items:
+            st.table([{"#": i, "Task": a.task, "Owner": a.owner, "Deadline": a.deadline}
+                      for i, a in enumerate(m.action_items, 1)])
+        else:
+            st.caption("No action items were identified.")
+        st.download_button("⬇️ Minutes .md", minutes_to_markdown(m, date=str(mom_date)), f"{stem}.minutes.md", key="dl_minutes")

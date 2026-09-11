@@ -14,7 +14,13 @@ import time
 from pathlib import Path
 
 from transcriptogen.config import TranscribeOptions
-from transcriptogen.generators import ContentGenerator, has_devanagari, quiz_to_markdown
+from transcriptogen.generators import (
+    ContentGenerator,
+    has_devanagari,
+    minutes_to_markdown,
+    point_notes_to_markdown,
+    quiz_to_markdown,
+)
 from transcriptogen.subtitles import cues_from_text, cues_from_words, speaker_transcript, to_srt, to_vtt
 from transcriptogen.transcriber import GeminiTranscriber
 from transcriptogen.youtube import download_audio, is_url
@@ -31,6 +37,8 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--translate", metavar="LANGUAGE", help="also translate transcript + subtitles")
     p.add_argument("--quiz", type=int, metavar="N", help="generate N MCQs")
     p.add_argument("--notes", action="store_true", help="generate summary / key points")
+    p.add_argument("--points", action="store_true", help="generate detailed point-wise notes")
+    p.add_argument("--minutes", action="store_true", help="generate minutes of meeting (agenda, decisions, action items)")
     p.add_argument("--keep-script", action="store_true",
                    help="do not convert Hindi/Devanagari output to Urdu script")
     p.add_argument("--out", default="outputs", help="output directory")
@@ -87,8 +95,14 @@ def main(argv: list[str] | None = None) -> int:
     (out / f"{stem}.vtt").write_text(to_vtt(cues), encoding="utf-8")
     (out / f"{stem}.json").write_text(json.dumps(result.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8")
 
-    if a.translate or a.quiz or a.notes:
+    if a.translate or a.quiz or a.notes or a.points or a.minutes:
         gen = ContentGenerator()
+        if a.points:
+            print("Generating point-wise notes ...")
+            (out / f"{stem}.points.md").write_text(point_notes_to_markdown(gen.point_notes(result.text)), encoding="utf-8")
+        if a.minutes:
+            print("Generating minutes of meeting ...")
+            (out / f"{stem}.minutes.md").write_text(minutes_to_markdown(gen.meeting_minutes(result.text)), encoding="utf-8")
         if a.translate:
             print(f"Translating to {a.translate} ...")
             (out / f"{stem}.{a.translate}.txt").write_text(gen.translate(result.text, a.translate), encoding="utf-8")

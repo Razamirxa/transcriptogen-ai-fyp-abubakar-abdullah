@@ -51,6 +51,40 @@ class StudyNotes(BaseModel):
     chapters: list[str] = Field(description="Suggested section/chapter titles in order")
 
 
+class NoteSection(BaseModel):
+    heading: str
+    points: list[str] = Field(description="Short bullet points (one idea each) under this heading")
+
+
+class PointNotes(BaseModel):
+    """Detailed, point-wise notes: sections with bullet points."""
+
+    title: str
+    sections: list[NoteSection]
+    key_takeaways: list[str] = Field(description="5-8 most important points overall")
+
+
+class ActionItem(BaseModel):
+    task: str
+    owner: str = Field(description="Person / speaker responsible, or 'Unassigned'")
+    deadline: str = Field(description="Deadline if mentioned, else 'Not specified'")
+
+
+class MeetingMinutes(BaseModel):
+    """Minutes of Meeting (MoM) generated from a meeting / speech recording."""
+
+    title: str
+    meeting_type: str = Field(description="e.g. team meeting, lecture, interview, speech, discussion")
+    participants: list[str] = Field(description="Speakers / people mentioned (names if said, else Speaker 1, 2 ...)")
+    agenda: list[str] = Field(description="Topics discussed, in order")
+    discussion_summary: str = Field(description="Concise narrative summary of the discussion")
+    key_points: list[str]
+    decisions: list[str] = Field(description="Decisions taken / conclusions reached")
+    action_items: list[ActionItem]
+    open_questions: list[str] = Field(description="Unresolved questions or issues raised")
+    next_steps: list[str]
+
+
 # ----------------------------------------------------------------------------
 # Prompts (kept from earlier Gemini projects, tuned for Urdu/English mixes)
 # ----------------------------------------------------------------------------
@@ -109,8 +143,44 @@ Transcript:
 {text}
 ---"""
 
-NOTES_PROMPT = """Read the transcript and produce study notes in {language}:
+NOTES_PROMPT = """Read the transcript and produce study notes:
 a concise summary, 5-10 key points, 5-15 keywords, and ordered chapter titles that describe how the content flows.
+
+LANGUAGE RULE: write everything in {language}, translating from the transcript's language if needed.
+Technical terms and names may stay in English. If {language} is Urdu, use Urdu script (never Roman Urdu, never Hindi).
+
+Transcript:
+---
+{text}
+---"""
+
+POINT_NOTES_PROMPT = """Turn the transcript into detailed, point-wise notes.
+
+LANGUAGE RULE: write EVERYTHING (title, headings, every bullet, takeaways) in {language}.
+If the transcript is in a different language, translate the content into {language}.
+Technical terms, product names and acronyms may stay in English. If {language} is Urdu, use Urdu script (never Roman Urdu, never Hindi).
+
+- Organise the content under clear headings that follow the order of the talk.
+- Under each heading write short bullet points: one fact / idea / step per point, no long paragraphs.
+- Keep numbers, names, definitions, formulas and examples that were actually said.
+- Finish with the most important key takeaways.
+
+Transcript:
+---
+{text}
+---"""
+
+MINUTES_PROMPT = """Write formal Minutes of Meeting (MoM) for the recording transcribed below
+(it may be a meeting, discussion, interview, lecture or a speech).
+
+LANGUAGE RULE: write every field in {language}, translating from the transcript's language if needed.
+Technical terms and names may stay in English. If {language} is Urdu, use Urdu script (never Roman Urdu, never Hindi).
+- Participants: use real names if they are mentioned, otherwise keep the speaker labels (Speaker 1, Speaker 2...).
+- Agenda: the topics actually discussed, in order.
+- Decisions: only things that were actually decided / concluded; do not invent.
+- Action items: concrete tasks with the responsible person and deadline if stated ("Unassigned" / "Not specified" otherwise).
+- Open questions and next steps as discussed.
+- Be factual and concise; technical terms and names stay in English; for Urdu use Urdu script.
 
 Transcript:
 ---
@@ -356,6 +426,49 @@ class ContentGenerator:
 
     def notes(self, text: str, language: str = "English") -> StudyNotes:
         return self._json(NOTES_PROMPT.format(language=language, text=text[:MAX_CHARS]), StudyNotes, temperature=0.3)
+
+    def point_notes(self, text: str, language: str = "English") -> PointNotes:
+        return self._json(POINT_NOTES_PROMPT.format(language=language, text=text[:MAX_CHARS]), PointNotes, temperature=0.3)
+
+    def meeting_minutes(self, text: str, language: str = "English") -> MeetingMinutes:
+        return self._json(MINUTES_PROMPT.format(language=language, text=text[:MAX_CHARS]), MeetingMinutes, temperature=0.2)
+
+
+def notes_to_markdown(n: StudyNotes, title: str = "Notes") -> str:
+    return (
+        f"# {title}\n\n## Summary\n{n.summary}\n\n## Key points\n"
+        + "\n".join(f"- {k}" for k in n.key_points)
+        + "\n\n## Chapters\n" + "\n".join(f"{i}. {c}" for i, c in enumerate(n.chapters, 1))
+        + "\n\n**Keywords:** " + ", ".join(n.keywords) + "\n"
+    )
+
+
+def point_notes_to_markdown(p: PointNotes) -> str:
+    lines = [f"# {p.title}", ""]
+    for s in p.sections:
+        lines.append(f"## {s.heading}")
+        lines += [f"- {pt}" for pt in s.points]
+        lines.append("")
+    lines.append("## Key takeaways")
+    lines += [f"- {k}" for k in p.key_takeaways]
+    return "\n".join(lines) + "\n"
+
+
+def minutes_to_markdown(m: MeetingMinutes, *, date: str | None = None) -> str:
+    lines = [f"# Minutes of Meeting: {m.title}", ""]
+    if date:
+        lines.append(f"**Date:** {date}  ")
+    lines.append(f"**Type:** {m.meeting_type}  ")
+    lines.append(f"**Participants:** {', '.join(m.participants) or '-'}")
+    lines += ["", "## Agenda"] + [f"{i}. {a}" for i, a in enumerate(m.agenda, 1)]
+    lines += ["", "## Discussion summary", m.discussion_summary]
+    lines += ["", "## Key points"] + [f"- {k}" for k in m.key_points]
+    lines += ["", "## Decisions"] + ([f"- {d}" for d in m.decisions] or ["- None recorded"])
+    lines += ["", "## Action items", "", "| # | Task | Owner | Deadline |", "|---|------|-------|----------|"]
+    lines += [f"| {i} | {a.task} | {a.owner} | {a.deadline} |" for i, a in enumerate(m.action_items, 1)] or ["| - | None | - | - |"]
+    lines += ["", "## Open questions"] + ([f"- {q}" for q in m.open_questions] or ["- None"])
+    lines += ["", "## Next steps"] + ([f"- {s}" for s in m.next_steps] or ["- None"])
+    return "\n".join(lines) + "\n"
 
 
 def quiz_to_markdown(q: Quiz, *, show_answers: bool = True) -> str:

@@ -118,6 +118,32 @@ def test_fatal_error_not_retried(monkeypatch):
     assert g.calls == [("k1", "m1")]
 
 
+def test_markdown_converters():
+    from transcriptogen.generators import (
+        ActionItem, MeetingMinutes, NoteSection, PointNotes, StudyNotes,
+        minutes_to_markdown, notes_to_markdown, point_notes_to_markdown,
+    )
+
+    p = PointNotes(title="Photosynthesis", sections=[NoteSection(heading="Stages", points=["Light reactions", "Calvin cycle"])],
+                   key_takeaways=["Light -> chemical energy"])
+    md = point_notes_to_markdown(p)
+    assert md.startswith("# Photosynthesis\n\n## Stages\n- Light reactions\n- Calvin cycle")
+    assert "## Key takeaways\n- Light -> chemical energy" in md
+
+    m = MeetingMinutes(title="Sprint sync", meeting_type="team meeting", participants=["Speaker 1", "Speaker 2"],
+                       agenda=["Status", "Blockers"], discussion_summary="Discussed progress.",
+                       key_points=["On track"], decisions=["Ship Friday"],
+                       action_items=[ActionItem(task="Fix login", owner="Speaker 2", deadline="Thursday")],
+                       open_questions=[], next_steps=["Demo"])
+    md = minutes_to_markdown(m, date="2026-09-11")
+    assert "# Minutes of Meeting: Sprint sync" in md and "**Date:** 2026-09-11" in md
+    assert "| 1 | Fix login | Speaker 2 | Thursday |" in md
+    assert "## Open questions\n- None" in md
+
+    n = StudyNotes(summary="S", key_points=["k1"], keywords=["kw"], chapters=["c1"])
+    assert "## Summary\nS\n\n## Key points\n- k1" in notes_to_markdown(n)
+
+
 def test_fix_urdu_script_skips_clean_text(monkeypatch):
     g = _gen([], monkeypatch)
     urdu = "Speaker 1: یہ بہت اہم موضوع ہے اور we need to discuss this."

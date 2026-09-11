@@ -20,7 +20,8 @@ Koi bhi **video ya audio file** (ya YouTube link) do, ye app usse banata hai:
 | **Subtitles (SRT / VTT)** | Har lafz ke real timestamps se bani subtitle files                                                             |
 | **Translation**           | Transcript aur subtitles ka tarjuma (Urdu, English, Arabic, Hindi, aur 9 aur languages), timing same rehti hai |
 | **Quiz (MCQs)**           | Lecture se sawal, 4 options, hint, aur har option ki wajah                                                     |
-| **Study notes**           | Summary, key points, chapters, keywords                                                                        |
+| **Notes** | Point-wise detailed notes (headings + bullets) ya short summary notes |
+| **Meeting minutes** | Meeting / speech ki recording se MoM: agenda, decisions, action items (owner, deadline), next steps |
 | **Live captions**         | Real-time transcription demo (`live_demo.py`)                                                                |
 | **Lambi videos**          | 1 ghante+ ki video bhi chalti hai, code khud chunks banata hai                                                 |
 
@@ -117,7 +118,11 @@ Upar caption mein check karo: characters, cues, **last cue kahan khatam hui vs m
 
 - **Translation**: target language chuno → **🌐 Translate** → text + translated `.srt`/`.vtt`. Ek se zyada languages generate kar ke unke beech switch kar sakte ho.
 - **Quiz**: questions count, difficulty, language → **❓ Generate quiz** → sawal hal karo → **Check answers** → score aur har sawal ki explanation. Download `.md`.
-- **Study notes**: language → **📚 Generate notes** → summary, key points, chapters, keywords. Download `.md`.
+- **Notes**: language + format chuno → **📚 Generate notes**:
+  - `Point-wise notes (detailed bullets)`: headings ke neeche bullet points (facts, definitions, examples), aakhir mein key takeaways. Lecture ke liye best.
+  - `Summary notes (short)`: summary, key points, chapters, keywords.
+  Download `.points.md` / `.notes.md`.
+- **Meeting minutes**: agar recording kisi meeting / discussion / speech ki hai → language aur date chuno → **📋 Generate minutes** → participants, agenda, discussion summary, key points, decisions, **action items (task / owner / deadline)**, open questions, next steps. Download `.minutes.md`.
 
 Naya transcript generate karoge to purani translation/quiz/notes clear ho jayengi.
 
@@ -133,6 +138,9 @@ uv run cli.py "lecture.mp4"
 
 # Urdu lecture, English translation, 5 MCQs, notes
 uv run cli.py "lecture.mp4" --lang ur-PK en-US --translate English --quiz 5 --notes
+
+# Meeting recording: minutes of meeting + point-wise notes
+uv run cli.py "meeting.mp3" --minutes --points
 
 # YouTube se
 uv run cli.py "https://youtu.be/xxxx" --translate Urdu
@@ -265,8 +273,10 @@ Neeche har file ke functions/classes hain, is order mein jis order mein file mei
 | -------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | `AnswerOption`, `Question`, `Quiz`                                                                       | Quiz ka JSON schema (pydantic): option ka`text`, `is_correct`, `rationale`; question ka `hint`, `topic` |
 | `TranslatedCue`, `TranslatedCues`                                                                          | Cue translation ka schema (`index` + `text`) taake timing map ho sake                                         |
-| `StudyNotes`                                                                                                 | `summary`, `key_points`, `keywords`, `chapters`                                                           |
-| `TRANSLATE_PROMPT`, `TRANSLATE_CUES_PROMPT`, `QUIZ_PROMPT`, `URDU_SCRIPT_FIX_PROMPT`, `NOTES_PROMPT` | Saare prompts (technical terms English, Urdu script, Roman Urdu nahi)                                             |
+| `StudyNotes` | `summary`, `key_points`, `keywords`, `chapters` |
+| `NoteSection`, `PointNotes` | Point-wise notes: `title`, `sections[{heading, points[]}]`, `key_takeaways` |
+| `ActionItem`, `MeetingMinutes` | Minutes of meeting: `participants`, `agenda`, `discussion_summary`, `key_points`, `decisions`, `action_items[{task, owner, deadline}]`, `open_questions`, `next_steps` |
+| `TRANSLATE_PROMPT`, `TRANSLATE_CUES_PROMPT`, `QUIZ_PROMPT`, `URDU_SCRIPT_FIX_PROMPT`, `NOTES_PROMPT`, `POINT_NOTES_PROMPT`, `MINUTES_PROMPT` | Saare prompts (chuni hui language mein output, technical terms English, Urdu script, Roman Urdu nahi) |
 | `MAX_CHARS`                                                                                                  | Transcript ka max hissa jo prompt mein jata hai (120k chars)                                                      |
 | `retry_delay_seconds(e)`                                                                                     | Error se "retry in 1.2s" parse                                                                                    |
 | `classify_error(e)`                                                                                          | `transient` / `quota` / `billing` / `model_gone` / `fatal`                                              |
@@ -285,8 +295,10 @@ Neeche har file ke functions/classes hain, is order mein jis order mein file mei
 | ↳`translate(text, target)`                                                                                  | Transcript ka tarjuma                                                                                             |
 | ↳`translate_cues(cues, target)`                                                                             | Cues ka tarjuma, 80 cues per batch                                                                                |
 | ↳`quiz(text, n, difficulty, language)`                                                                      | MCQs                                                                                                              |
-| ↳`notes(text, language)`                                                                                    | Study notes                                                                                                       |
-| `quiz_to_markdown(q)`                                                                                        | Quiz →`.md` text with answers                                                                                  |
+| ↳ `notes(text, language)` | Summary notes |
+| ↳ `point_notes(text, language)` | Detailed point-wise notes (headings + bullets) |
+| ↳ `meeting_minutes(text, language)` | Minutes of meeting (agenda, decisions, action items ...) |
+| `quiz_to_markdown(q)`, `notes_to_markdown(n)`, `point_notes_to_markdown(p)`, `minutes_to_markdown(m, date)` | Har output ka `.md` file text |
 
 #### `transcriptogen/youtube.py`
 
