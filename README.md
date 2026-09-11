@@ -67,7 +67,7 @@ notepad .env        # yahan GEMINI_API_KEY=... paste karo, save karo
 # 4) FFmpeg check karo (version dikhna chahiye)
 ffmpeg -version
 
-# 5) Tests chalao (internet / API ki zaroorat nahi, 27 tests pass hone chahiye)
+# 5) Tests chalao (internet / API ki zaroorat nahi, 30 tests pass hone chahiye)
 uv run pytest
 
 # 6) App chalao
@@ -347,8 +347,10 @@ Neeche har file ke functions/classes hain, is order mein jis order mein file mei
 | `safe_name(stem)`                | File name se ajeeb characters hatana                                                                                   |
 | `reset_outputs()`                | Naye transcript par purani translation/quiz/notes clear                                                                |
 | Step 1 block                       | Upload/URL, settings,`TranscribeOptions`, background thread mein `transcribe()`, elapsed/ETA timer, Devanagari fix |
-| Step 2 block                       | Tabs: Transcript, Speakers, SRT, VTT (download + full preview)                                                         |
-| Step 3 block                       | Tabs: Translation, Quiz (form + scoring), Notes; har ek apne button par                                                |
+| Step 2 block | Images upload (10 tak), `analyse_images` / `ask_images` buttons, `use_images` checkbox |
+| Step 3 block | Tabs: Transcript, Speakers, SRT, VTT (download + full preview) |
+| `source_text()` | Step 4 ka input: transcript + (agar on ho) image text |
+| Step 4 block | Tabs: Translation, Quiz (form + scoring), Notes, Meeting minutes; har ek apne button par |
 
 #### `cli.py`
 
@@ -472,7 +474,7 @@ Har model ke sirf ~**20 requests per day** aur chhoti per-minute limit. Isliye c
 ## 10. Tests
 
 ```powershell
-uv run pytest            # 27 tests, offline, API key ki zaroorat nahi
+uv run pytest            # 30 tests, offline, API key ki zaroorat nahi
 uv run pytest -v         # har test ka naam
 ```
 
