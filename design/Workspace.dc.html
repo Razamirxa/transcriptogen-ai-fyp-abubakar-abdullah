@@ -23,15 +23,13 @@
     .tab { cursor: pointer; transition: background 0.2s ease, color 0.2s ease; }
     .turn:hover { background: var(--hover); }
     .turn { transition: background 0.2s ease; }
-    .stage { perspective: 1200px; }
-    @keyframes spin { from { transform: rotateX(-18deg) rotateY(0deg); } to { transform: rotateX(-18deg) rotateY(360deg); } }
-    .cube { animation: spin 20s linear infinite; transform-style: preserve-3d; }
-    .face { position: absolute; inset: 0; border: 1px solid var(--accent); background: var(--faceBg);
-            background-image: repeating-linear-gradient(90deg, var(--accent) 0 3px, transparent 3px 7px); background-size: 100% 46%; background-repeat: no-repeat; background-position: center; }
+    .tile-svg { width: 130px; height: 130px; overflow: visible; }
+    @keyframes floatA { 0%, 100% { translate: 0 0; } 50% { translate: 0 -10px; } }
+    .tile-obj { transform-box: fill-box; transform-origin: center; animation: floatA 4.5s ease-in-out infinite; }
   </style>
 </helmet>
 
-<div class="page" style="--bg: {{t.bg}}; --panel: {{t.panel}}; --surface: {{t.surface}}; --border: {{t.border}}; --text: {{t.text}}; --muted: {{t.muted}}; --faint: {{t.faint}}; --hover: {{t.hover}}; --accent: {{accent}}; --amber: {{t.amber}}; --faceBg: {{t.faceBg}}; width: 1440px; height: 900px; background: var(--bg); color: var(--text); display: grid; grid-template-columns: 248px minmax(0, 1fr) 420px; overflow: hidden;">
+<div class="page" style="--bg: {{t.bg}}; --panel: {{t.panel}}; --surface: {{t.surface}}; --border: {{t.border}}; --text: {{t.text}}; --muted: {{t.muted}}; --faint: {{t.faint}}; --hover: {{t.hover}}; --accent: {{accent}}; --amber: {{t.amber}}; width: 1440px; height: 900px; background: var(--bg); color: var(--text); display: grid; grid-template-columns: 248px minmax(0, 1fr) 420px; overflow: hidden;">
 
   <!-- sidebar -->
   <div class="panel" style="display: flex; flex-direction: column; gap: 8px; padding: 22px 16px; border-right: 1px solid var(--border); background: var(--panel);">
@@ -56,18 +54,29 @@
       <div style="width: 24px; height: 24px; border-radius: 8px; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800;">4</div>Generate
     </div>
 
-    <div class="stage" style="margin-top: 24px; height: 150px; display: flex; align-items: center; justify-content: center;">
-      <div style="position: relative; width: 84px; height: 84px; transform-style: preserve-3d;">
-        <div class="cube" style="position: absolute; inset: 0;">
-          <div class="face" style="transform: translateZ(42px);"></div>
-          <div class="face" style="transform: rotateY(180deg) translateZ(42px);"></div>
-          <div class="face" style="transform: rotateY(90deg) translateZ(42px);"></div>
-          <div class="face" style="transform: rotateY(-90deg) translateZ(42px);"></div>
-          <div class="face" style="transform: rotateX(90deg) translateZ(42px); background-image: none;"></div>
-          <div class="face" style="transform: rotateX(-90deg) translateZ(42px); background-image: none;"></div>
-        </div>
-      </div>
-    </div>
+    <div class="tile-wrap" style="margin-top: 24px; height: 150px; display: flex; align-items: center; justify-content: center;">
+<svg class="tile-svg" viewBox="0 0 120 120" width="120" height="120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  
+  <defs>
+    <linearGradient id="gBody" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6D66F0"/><stop offset="1" stop-color="#3B34B8"/></linearGradient>
+    <linearGradient id="gCap" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F4F4FB"/><stop offset="1" stop-color="#C9C9DE"/></linearGradient>
+    <linearGradient id="gDark" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3A3A4C"/><stop offset="1" stop-color="#15151C"/></linearGradient>
+    <linearGradient id="gAmber" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FBBF24"/><stop offset="1" stop-color="#D97706"/></linearGradient>
+    <linearGradient id="gGreen" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34D399"/><stop offset="1" stop-color="#059669"/></linearGradient>
+    <linearGradient id="gPink" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F472B6"/><stop offset="1" stop-color="#BE185D"/></linearGradient>
+    <radialGradient id="gGlow" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="var(--accent)" stop-opacity="0.35"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></radialGradient>
+    <pattern id="grille" width="8" height="8" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="1.6" fill="#8E8EA8"/></pattern>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="6"/></filter>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="14" stdDeviation="12" flood-color="#0B0B12" flood-opacity="0.28"/></filter>
+  </defs>
+  <g filter="url(#shadow)">
+    <path d="M60 22 108 46 60 70 12 46z" fill="url(#gGreen)"/>
+    <path d="M12 46v14l48 24V70z" fill="#0B0B12" opacity="0.28"/>
+    <path d="M108 46v14L60 84V70z" fill="#0B0B12" opacity="0.14"/>
+    <path d="M60 22 108 46 60 70 12 46z" fill="#FFFFFF" opacity="0.12"/>
+  </g>
+  <g class="tile-obj"><g transform="translate(26 16) skewY(-12)"><rect x="4" y="2" width="68" height="46" rx="8" fill="url(#gCap)" stroke="#B8B8D0"/><rect x="12" y="12" width="46" height="7" rx="3.5" fill="#15151C" opacity="0.8"/><rect x="12" y="24" width="34" height="7" rx="3.5" fill="#15151C" opacity="0.5"/><circle cx="58" cy="34" r="9" fill="url(#gGreen)"/><path d="M55 29v10l8-5z" fill="#FFFFFF"/></g></g>
+</svg></div>
 
     <div class="surface" style="margin-top: auto; display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 14px;">
       <div class="faint" style="font-size: 11px; font-weight: 700; letter-spacing: 0.1em;">THIS FILE</div>
@@ -210,8 +219,8 @@
 </div>
 </x-dc>
 <script data-dc-script data-props='{"accent":{"editor":"color","default":"#4F46E5","options":["#4F46E5","#6366F1","#0EA5E9","#E11D48"],"section":"Theme"},"$preview":{"width":1440,"height":900}}'>
-const LIGHT = { ok: "#047857", okBg: "rgba(16,185,129,0.12)", bg: "#F7F7F4", panel: "#FBFBF9", surface: "#FFFFFF", border: "rgba(20,20,26,0.10)", text: "#15151C", muted: "#5F5F6E", faint: "#9A9AA8", hover: "rgba(20,20,26,0.05)", amber: "#D97706", faceBg: "rgba(255,255,255,0.6)" };
-const DARK = { ok: "#6EE7B7", okBg: "rgba(16,185,129,0.16)", bg: "#0B0B12", panel: "#0E0E17", surface: "rgba(255,255,255,0.05)", border: "rgba(255,255,255,0.12)", text: "#F4F4F5", muted: "#B4B4C2", faint: "#6B6B7C", hover: "rgba(255,255,255,0.05)", amber: "#F59E0B", faceBg: "rgba(11,11,18,0.6)" };
+const LIGHT = { ok: "#047857", okBg: "rgba(16,185,129,0.12)", bg: "#F7F7F4", panel: "#FBFBF9", surface: "#FFFFFF", border: "rgba(20,20,26,0.10)", text: "#15151C", muted: "#5F5F6E", faint: "#9A9AA8", hover: "rgba(20,20,26,0.05)", amber: "#D97706" };
+const DARK = { ok: "#6EE7B7", okBg: "rgba(16,185,129,0.16)", bg: "#0B0B12", panel: "#0E0E17", surface: "rgba(255,255,255,0.05)", border: "rgba(255,255,255,0.12)", text: "#F4F4F5", muted: "#B4B4C2", faint: "#6B6B7C", hover: "rgba(255,255,255,0.05)", amber: "#F59E0B" };
 
 class Component extends DCLogic {
   constructor(props) {

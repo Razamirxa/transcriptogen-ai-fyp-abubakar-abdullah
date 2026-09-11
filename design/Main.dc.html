@@ -544,10 +544,8 @@ class Component extends DCLogic {
     });
     const clock = src[li].t;
     const bars = this._bars.map((b, i) => ({ ...b, color: i % 9 === 0 ? t.amber : accent }));
-    const langs = [["English", accent], ["اردو", t.amber], ["العربية", "#10B981"], ["हिन्दी", "#EC4899"], ["Español", "#0EA5E9"], ["Français", "#8B5CF6"]];
-    const orbit = langs.map(([label, color], i) => ({ label, color, deg: i * 60, neg: -i * 60 }));
     return {
-      accent, t, lines, bars, clock, orbit,
+      accent, t, lines, bars, clock,
       isDark: dark, isLight: !dark,
       themeLabel: dark ? "Dark" : "Light",
       toggleTheme: () => this.setState({ dark: !this.state.dark })
