@@ -17,3 +17,8 @@ samples/*.mp3
 *.tmp
 .streamlit/secrets.toml
 samples/sample_urdu.mp3
+
+# design canvas scratch (extracted live copies, assembled 2.4MB page)
+design/live_v*/
+design/*.html
+!design/*.dc.html
